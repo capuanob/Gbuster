@@ -5,8 +5,8 @@
 #ifndef GBUSTER_GFRAME_H
 #define GBUSTER_GFRAME_H
 
-#include <memory>
 #include <wx/wx.h>
+#include "md5.h"
 
 // Unique identifiers for menu commands. As many must be defined, an enum element is used.
 enum {

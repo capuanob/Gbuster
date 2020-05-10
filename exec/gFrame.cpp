@@ -5,7 +5,7 @@
 #include "gFrame.h"
 
 void GFrame::OnAbout(wxCommandEvent &event) {
-    wxMessageBox("This is a wxWidgets' Hello World sample", "About Hello World", wxOK | wxICON_INFORMATION);
+    wxMessageBox("This software provides capabilities for rapid hash-breaking using the parallel power of a GPU.", "About Gbuster", wxOK | wxICON_INFORMATION);
 }
 
 void GFrame::OnExit(wxCommandEvent &event) {
@@ -13,7 +13,8 @@ void GFrame::OnExit(wxCommandEvent &event) {
 }
 
 void GFrame::OnLoad(wxCommandEvent &event) {
-    return;
+    Byte bytes[] = {Byte("FF"), Byte("AB"), Byte("44"), Byte("56")};
+    Word w(bytes, 4);
 }
 
 
@@ -36,10 +37,10 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
 
     SetMenuBar( menuBar );
     CreateStatusBar();
-    SetStatusText( "Welcome to wxWidgets!" );
+    SetStatusText( "Welcome to Gbuster!" );
 
 }
 
 void GFrame::loadMainUI() {
-    auto *list = new wxListCtrl();
+
 }
