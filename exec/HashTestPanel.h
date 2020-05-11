@@ -21,10 +21,12 @@ public:
     ~HashTestPanel() override = default;
 
     void OnPress(wxCommandEvent& event);
+    void OnTextDidChange(wxCommandEvent& event);
 
     std::string getTextBoxValue();
 private:
     wxTextCtrl* textBox;
+    wxStaticText* charCount;
     wxStaticText* hashOutputLabel;
     wxButton* hashButton;
     std::function<std::string(std::string)> hashFunc;

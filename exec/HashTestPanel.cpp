@@ -11,15 +11,19 @@ HashTestPanel::HashTestPanel(wxWindow* parent, const wxString& lbl, std::functio
 {
     this->hashFunc = std::move(fnc);
 
-    textBox = new wxTextCtrl(this, -1, wxT("Text to hash:"),
+    charCount = new wxStaticText(this, -1, "c", wxDefaultPosition, wxDefaultSize);
+    textBox = new wxTextCtrl(this, ID_TXTBOX, wxT("Text to hash:"),
                              wxDefaultPosition, wxSize(450, 40));
     hashOutputLabel = new wxStaticText(this, -1,
                                        "Message Digest: ", wxDefaultPosition, wxSize(450, 100));
     hashButton = new wxButton(this, ID_HASH, lbl, wxDefaultPosition, wxDefaultSize);
 
     auto *boxSizer = new wxBoxSizer(wxVERTICAL);
+    auto *counterSizer = new wxBoxSizer(wxHORIZONTAL);
 
     boxSizer->Add(textBox);
+    counterSizer->Add(charCount, 1);
+    boxSizer->Add(counterSizer, 0, wxALIGN_RIGHT | wxRIGHT, 15);
     boxSizer->AddSpacer(5);
     boxSizer->Add(hashButton);
     boxSizer->AddSpacer(10);
@@ -40,4 +44,11 @@ std::string HashTestPanel::getTextBoxValue() {
 
 BEGIN_EVENT_TABLE(HashTestPanel, wxPanel)
     EVT_BUTTON(ID_HASH, HashTestPanel::OnPress)
+    EVT_TEXT(ID_TXTBOX, HashTestPanel::OnTextDidChange)
 END_EVENT_TABLE()
+
+void HashTestPanel::OnTextDidChange(wxCommandEvent &event) {
+    wxString curr_str = event.GetString();
+    if (charCount != nullptr) // Creation of textBox emits an EVT_TEXT, have to avoid that
+        charCount->SetLabel(std::to_string(curr_str.length()) + " c");
+}

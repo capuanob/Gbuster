@@ -11,5 +11,6 @@
 enum IDs {
     ID_Load = wxID_HIGHEST + 1,
     ID_TEST_MD5,
-    ID_HASH
+    ID_HASH,
+    ID_TXTBOX
 };
