@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <list>
 #include "binary.h"
 
 using namespace bin;
@@ -42,6 +44,11 @@ const unsigned int T[] = {
         0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
+std::vector<Byte> split64(uint64_t src);
+
+class Message;
+class md5;
+
 /**
  * Assumptions
  * A "word" is a 32-bit quantity
@@ -53,8 +60,20 @@ class md5 {
 public:
     static std::string getDigest(const std::string& msg);
 
-    static std::vector<Byte> paddedToBytes(const std::string &basicString, unsigned int count);
+    static Message paddedToBytes(const std::string &basicString, unsigned int count, unsigned int origLen);
 };
 
+class Message {
+public:
+    void add(const Byte& byte);
+    void add(const std::vector<Byte>& bytes);
+    template <typename ...T>
+    void emplace(T&& ...args);
+
+    Message() = default;
+    void printDebug();
+private:
+    std::list<Byte> bytes;
+};
 
 #endif //GBUSTER_MD5_H

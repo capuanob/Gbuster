@@ -13,8 +13,7 @@ void GFrame::OnExit(wxCommandEvent &event) {
 }
 
 void GFrame::OnLoad(wxCommandEvent &event) {
-    Byte bytes[] = {Byte("FF"), Byte("AB"), Byte("44"), Byte("56")};
-    Word w(bytes, 4);
+    md5::getDigest("5r09r030450t0gd00sqallf0v0s0a0505slxlDKFKFLSL%#)@)!)!)@8");
 }
 
 
@@ -23,7 +22,7 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
 {
 
     auto *menuFile = new wxMenu;
-    menuFile->Append(ID_Load, "&Load from file...\tCtrl-L, ",
+    menuFile->Append(ID_Load, "&Load from file...\tCtrl-L",
             "Load a password hash dump from a file.");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
@@ -31,11 +30,15 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     auto *menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
 
+    auto *menuDebug = new wxMenu;
+    menuDebug->Append( ID_TEST_MD5, "&Test MD5\tCtrl-M", "Test MD5 hash");
     auto *menuBar = new wxMenuBar;
+
     menuBar->Append( menuFile, "&File" );
     menuBar->Append( menuHelp, "&Help" );
+    menuBar->Append( menuDebug, "&Debug" );
 
-    SetMenuBar( menuBar );
+    SetMenuBar(menuBar);
     CreateStatusBar();
     SetStatusText( "Welcome to Gbuster!" );
 
@@ -43,4 +46,10 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
 
 void GFrame::loadMainUI() {
 
+}
+
+void GFrame::OnTestMD5(wxCommandEvent &event) {
+    auto *debugFrame = new DebugFrame(this, "Admin Panel",
+            wxPoint(50, 50), wxSize(450, 600));
+    debugFrame->Show(true);
 }

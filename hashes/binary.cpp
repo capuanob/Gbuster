@@ -101,3 +101,4 @@ inline std::size_t bin::Word::size() const {
 bin::Word::Word(bool usesLittleEndian) {
     this->isLittleEndian = usesLittleEndian;
 }
+
