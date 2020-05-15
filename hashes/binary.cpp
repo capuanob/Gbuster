@@ -4,56 +4,58 @@
 
 #include "binary.h"
 
-uint8_t bin::htoi(const std::string& hex) {
-    unsigned int x;
-    std::stringstream ss;
-    ss << std::hex << hex;
-    ss >> x;
-    return static_cast<uint8_t>(x);
+uint32_t bin::btoi(const byte* bytes) {
+    return static_cast<uint32_t>(bytes[0] | (bytes[1] << U8) | (bytes[2] << U16) | (bytes[3] << U24));
 }
 
-bin::Byte::Byte(uint8_t value) : value(value) {}
+bin::Word bin::itow(uint32_t val) {
+    byte bytes[4];
+    //host-endian integer -> little-endian word
 
+    auto *valPtr = reinterpret_cast<byte*>(&val);
+    bytes[0] = valPtr[0];
+    bytes[1] = valPtr[1];
+    bytes[2] = valPtr[2];
+    bytes[3] = valPtr[3];
 
-bin::Byte::Byte(const std::string& hexValue) : value(htoi(hexValue)) {}
+    return Word(bytes, 4); // Let constructor handle host-endianness.
+}
 
-void bin::Word::append(const bin::Byte &b) {
-    if (ip >= bytes + BYTES_IN_WORD)
+std::vector<byte> bin::i64tb(uint64_t src) {
+    std::vector<byte> bytes;
+
+    for (unsigned int i = 0; i < 8; ++i)
+        bytes.push_back( (src >> (i * U8)) & static_cast<unsigned int>(0xFF));
+
+    return bytes;
+}
+
+bool bin::systemIsLittleEndian() {
+    int n = 1;
+    return (*(char *)&n == 1);
+}
+
+void bin::Word::append(byte b) {
+    if (ip >= BYTES_IN_WORD)
         throw std::out_of_range("This word is already completely filled.");
-    *ip++ = b;
+    bytes[ip++] = b;
 }
 
-bin::Word::Word(const Byte* pBytes, int byteCount, bool usesLittleEndian) : isLittleEndian(usesLittleEndian) {
-    int startIndex = BYTES_IN_WORD - byteCount; // Account for leading zeros.
-    Byte temp[4];
-    std::copy(pBytes, pBytes + byteCount, temp);
-
-    if (usesLittleEndian)
-        std::reverse(temp, temp + BYTES_IN_WORD);
-
-    for (int i = startIndex; i < BYTES_IN_WORD && i < byteCount + startIndex; ++i, ++ip)
-        bytes[i] = temp[i];
+bin::Word::Word(const byte* pBytes, int byteCount, Endian type) {
+    unsigned int insertionIdx = BYTES_IN_WORD - byteCount;
+    std::copy(pBytes, pBytes + byteCount, bytes + insertionIdx);
+    ensureLittleEndian(type);
 }
 
 
-bin::Word::Word(std::initializer_list<Byte> lBytes, bool usesLittleEndian) : isLittleEndian(usesLittleEndian) {
-    int byteCount = static_cast<int>(lBytes.size());
-    int startIndex = BYTES_IN_WORD - byteCount; // Account for leading zeros.
-
-    if (usesLittleEndian)
-        for (int i = byteCount; i < BYTES_IN_WORD && i >= startIndex; --i, ++ip)
-            bytes[3 - i + startIndex] = lBytes.begin()[i];
-    else
-        for (int i = startIndex; i < BYTES_IN_WORD && i < byteCount + startIndex; ++i, ++ip)
-            bytes[i] = lBytes.begin()[i];
+bin::Word::Word(std::initializer_list<byte> lBytes, Endian type) {
+    unsigned int insertionIdx = BYTES_IN_WORD - lBytes.size();
+    std::copy(lBytes.begin(), lBytes.end(), bytes + insertionIdx);
+    ensureLittleEndian(type);
 }
 
 bin::Word bin::Word::operator|(const bin::Word &other) const {
-    bool canCompute = isLittleEndian == other.isLittleEndian;
-    if (!canCompute)
-        throw std::logic_error("Words must be of same endianness and size");
-
-    Word w(isLittleEndian); // Currently empty, but endianness is properly setup.
+    Word w;
 
     for (int i = 0; i < BYTES_IN_WORD; i++)
         w.append(bytes[i] ^ other[i]);
@@ -62,19 +64,14 @@ bin::Word bin::Word::operator|(const bin::Word &other) const {
 }
 
 bin::Word bin::Word::operator~() const{
-    Word w(bytes, size(), isLittleEndian);
-    for (auto& byte : w.bytes)
-        byte = ~byte;
+    Word w;
+    for (const auto byte : bytes)
+        w.append(~byte);
     return w;
 }
 
 bin::Word bin::Word::operator&(const bin::Word &other) const{
-    bool canCompute = isLittleEndian == other.isLittleEndian;
-    if (!canCompute)
-        throw std::logic_error("Words must be of same endianness and size");
-
-    Word w(isLittleEndian);
-
+    Word w;
     for (int i = 0; i < BYTES_IN_WORD; i++)
         w.append(bytes[i] & other[i]);
 
@@ -82,23 +79,25 @@ bin::Word bin::Word::operator&(const bin::Word &other) const{
 }
 
 bin::Word bin::Word::operator^(const bin::Word &other) const {
-    bool canCompute = isLittleEndian == other.isLittleEndian;
-    if (!canCompute)
-        throw std::logic_error("Words must be of same endianness and size");
-
-    Word w(isLittleEndian);
-
+    Word w;
     for (int i = 0; i < BYTES_IN_WORD; i++)
         w.append(bytes[i] ^ other[i]);
 
     return w;
 }
 
-inline std::size_t bin::Word::size() const {
-    return bytes - ip;
+bin::Word bin::Word::operator+(const bin::Word &other) const {
+    auto moddedVal = static_cast<uint32_t>((value() + other.value()) % static_cast<int>(pow(2, 32)));
+    return itow(moddedVal);
 }
 
-bin::Word::Word(bool usesLittleEndian) {
-    this->isLittleEndian = usesLittleEndian;
+uint32_t bin::Word::value() const {
+    return btoi(bytes);
 }
 
+void bin::Word::ensureLittleEndian(Endian type) {
+    bool needsConversion = (type == Endian::SYSTEM && !systemIsLittleEndian()) || (type == Endian::BIG);
+
+    if (needsConversion)
+        std::reverse(bytes, bytes + BYTES_IN_WORD);
+}

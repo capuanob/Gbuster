@@ -4,50 +4,63 @@
 
 #ifndef GBUSTER_BINARY_H
 #define GBUSTER_BINARY_H
-static const int BYTES_IN_WORD = 4;
+static const unsigned int BYTES_IN_WORD = 4;
 
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <vector>
 #include <cstring> // memset
+#include <cmath> // pow
+
+using byte = uint8_t;
+
+enum class Endian {
+    SYSTEM, BIG, LITTLE
+};
 
 namespace bin {
 
-    // Converts a hex value to its unsigned integer equivalent
-    uint8_t htoi(const std::string& hex);
+    // Unsigned integers for bitwise operations, makes linter happy :)
+    constexpr uint8_t U8 = 8;
+    constexpr uint8_t U16 = 16;
+    constexpr uint8_t U24 = 24;
+    constexpr uint8_t U32 = 32;
 
-    struct Byte {
-        uint8_t value; // Holds actual byte value (0 - 255)
+    /*
+     * Internal representation of a word (aka 4 bytes), with useful helper functions and overrides
+     * Stored and operated on in little-endian
+     */
+    class Word;
 
-        Byte() { this->value = 0; }
-        explicit Byte(uint8_t value);
-        explicit Byte(const std::string& hexValue);
+    // ALL HELPER FUNCTIONS ASSUME LITTLE-ENDIAN ORDERING
+    Word itow(uint32_t val); // Converts a 32-bit integer value to a little-endian Word
+    uint32_t btoi(const byte* bytes); // Converts a little-endian array of bytes (4) to a 32-bit integer
+    std::vector<byte> i64tb(uint64_t src); // Splits a 64-bit integer into a little-endian vector of 8 bytes.
 
-        inline bool operator==(const Byte& other) const { return value == other.value; }
-        inline Byte operator^(const Byte& other) const { return Byte(value ^ other.value); }
-        inline Byte operator&(const Byte& other) const { return Byte(value & other.value); }
-        inline Byte operator|(const Byte& other) const { return Byte(value | other.value); }
-        inline Byte operator~() const { return Byte(~value); }
-    };
+    bool systemIsLittleEndian(); // Determines whether or not the host CPU is big or little endian.
 
     class Word {
-    private:
-        Byte bytes[4] = {Byte(0), Byte(0), Byte(0), Byte(0)}; // Holds byte values
-        Byte* ip = bytes;
-        bool isLittleEndian;
     public:
-        void append(const Byte& b); // Adds a byte to the bytes array (if not already full)
-        [[nodiscard]] inline std::size_t size() const;
+        [[nodiscard]] uint32_t value() const; // Returns 32-bit value.
 
-        Word(const Byte* lBytes, int byteCount, bool usesLittleEndian = true); // Preferred constructor
-        Word(std::initializer_list<Byte> lBytes, bool usesLittleEndian = true); // Initializer list constructor
-        explicit Word(bool usesLittleEndian);
+        Word(const byte* lBytes, int byteCount, Endian type = Endian::SYSTEM); // Array-based constructor
+        Word(std::initializer_list<byte> lBytes, Endian type = Endian::SYSTEM); // Initializer list constructor
+        Word() = default; // Default constructor
 
+        Word operator+(const Word& other) const;
         Word operator|(const Word& other) const;
         Word operator~() const;
         Word operator&(const Word& other) const;
         Word operator^(const Word& other) const;
-        inline const Byte& operator[](std::size_t idx) const { return bytes[idx]; }
+        inline const byte& operator[](std::size_t idx) const { return bytes[idx]; }
+
+    private:
+        byte bytes[4] = {0, 0, 0, 0}; // Holds byte values
+        int ip = 0; // Point to insert next byte into bytes array.
+
+        void append(byte b); // Adds a byte to the bytes array (if not already full)
+        void ensureLittleEndian(Endian type); // Converts a newly constructed Word to little endian, if type so requires
     };
 }
 

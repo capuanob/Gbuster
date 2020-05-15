@@ -5,7 +5,7 @@
 #include "gFrame.h"
 
 void GFrame::OnAbout(wxCommandEvent &event) {
-    wxMessageBox("This software provides capabilities for rapid hash-breaking using the parallel power of a GPU.", "About Gbuster", wxOK | wxICON_INFORMATION);
+    wxMessageBox("This software provides capabilities for rapid hash-cracking using the parallel power of a GPU.", "About Gbuster", wxOK | wxICON_INFORMATION);
 }
 
 void GFrame::OnExit(wxCommandEvent &event) {

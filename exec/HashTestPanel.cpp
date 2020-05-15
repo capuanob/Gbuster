@@ -49,6 +49,7 @@ END_EVENT_TABLE()
 
 void HashTestPanel::OnTextDidChange(wxCommandEvent &event) {
     wxString curr_str = event.GetString();
+
     if (charCount != nullptr) // Creation of textBox emits an EVT_TEXT, have to avoid that
         charCount->SetLabel(std::to_string(curr_str.length()) + " c");
 }

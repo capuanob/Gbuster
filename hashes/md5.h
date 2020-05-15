@@ -6,26 +6,14 @@
 #define GBUSTER_MD5_H
 
 #include <string>
-#include <vector>
 #include <iostream>
-#include <list>
 #include "binary.h"
 
 using namespace bin;
 
-// Four-word buffer used to compute the message digest. Little-endian, hex values given
-static const Word A({Byte("01"), Byte("23"), Byte("45"), Byte("67")});
-static const Word B({Byte("89"), Byte("ab"), Byte("cd"), Byte("ef")});
-static const Word C({Byte("fe"), Byte("dc"), Byte("ba"), Byte("98")});
-static const Word D({Byte("76"), Byte("54"), Byte("32"), Byte("10")});
+constexpr int WORDS_IN_BLOCK = 32;
 
-// Four auxiliary functions
-inline Word F(Word X, Word Y, Word Z) { return (X & Y) | (~X & Z); } // Conditional
-inline Word G(Word X, Word Y, Word Z) { return (X & Z) | (Y & ~Z); }
-inline Word H(Word X, Word Y, Word Z) { return X ^ Y ^ Z; }
-inline Word I(Word X, Word Y, Word Z) { return Y ^ (X | ~Z); }
-
-const unsigned int T[] = {
+constexpr unsigned int T[] = {
         0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
         0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
         0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be ,
@@ -44,36 +32,71 @@ const unsigned int T[] = {
         0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-std::vector<Byte> split64(uint64_t src);
-
-class Message;
-class md5;
-
-/**
- * Assumptions
- * A "word" is a 32-bit quantity
- * A "byte" is an eight-bit quantity
- * Bytes are stored in LITTLE-ENDIAN
- */
-class md5 {
-
-public:
-    static std::string getDigest(const std::string& msg);
-
-    static Message paddedToBytes(const std::string &basicString, unsigned int count, unsigned int origLen);
+constexpr unsigned int S[] = {
+        7, 12, 17, 22, 7, 12, 17, 22,
+        7, 12, 17, 22, 7, 12, 17, 22,
+        5, 9, 14, 20, 5, 9, 14, 20,
+        5, 9, 14, 20, 5, 9, 14, 20,
+        4, 11, 16, 23, 4, 11, 16, 23,
+        4, 11, 16, 23, 4, 11, 16, 23,
+        6, 10, 15, 21, 6, 10, 15, 21,
+        6, 10, 15, 21, 6, 10, 15, 21
 };
 
+// Four MD5 auxiliary functions
+inline Word F(Word X, Word Y, Word Z) { return (X & Y) | (~X & Z); } // Conditional
+inline Word G(Word X, Word Y, Word Z) { return (X & Z) | (Y & ~Z); }
+inline Word H(Word X, Word Y, Word Z) { return X ^ Y ^ Z; }
+inline Word I(Word X, Word Y, Word Z) { return Y ^ (X | ~Z); }
+
+inline Word LEFT_ROTATE(const Word wrd, unsigned int amt) {
+    return itow((wrd.value() << amt) | (wrd.value() >> (U32 - amt)));
+}
+
+inline Word FF(const Word & a, const Word& b, const Word& c,
+        const Word& d, const Word& blk, unsigned int tableVal, int shiftAmt) {
+    return LEFT_ROTATE(b + ((a + F(b,c,d) + blk + itow(tableVal))), shiftAmt);
+}
+
+/*
+ * Internal representation of a byte-stream message to be hashed.
+ * Comes with helper functions for QoL abstraction
+ */
+class Message;
+
+/*
+ * Solution suite providing MD5 functionality
+ */
+class md5 {
+public:
+    // Four-word buffer used to compute the message digest.
+
+    static std::string getDigest(const std::string& msg);
+};
+
+/*
+ * Abstracted collection for storing 16 blocks
+ */
+class Block {
+public:
+    void add(const Word&& w); // Appends a word
+    unsigned int value(); // Returns value of the block
+
+    Block() = default; // Default constructor, zeros properties out
+private:
+    Word words[16]; // Holds words of a block
+    int ip = 0; // Point for inserting next word
+};
+
+/*
+ * Abstracted collection for storing and processing input to MD5 algorithm.
+ */
 class Message {
 public:
-    void add(const Byte& byte);
-    void add(const std::vector<Byte>& bytes);
-    template <typename ...T>
-    void emplace(T&& ...args);
-
-    Message() = default;
-    void printDebug();
+    Message(const std::string& msg, unsigned int zeroBytesCount, unsigned int msgBitLen);
+    void add(byte b);
 private:
-    std::list<Byte> bytes;
+    std::vector<Block> chunks;
 };
 
 #endif //GBUSTER_MD5_H
