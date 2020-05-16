@@ -11,7 +11,7 @@
 
 using namespace bin;
 
-constexpr int WORDS_IN_BLOCK = 32;
+constexpr int WORDS_IN_BLOCK = 16;
 
 constexpr unsigned int T[] = {
         0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
@@ -53,9 +53,27 @@ inline Word LEFT_ROTATE(const Word wrd, unsigned int amt) {
     return itow((wrd.value() << amt) | (wrd.value() >> (U32 - amt)));
 }
 
-inline Word FF(const Word & a, const Word& b, const Word& c,
-        const Word& d, const Word& blk, unsigned int tableVal, int shiftAmt) {
-    return LEFT_ROTATE(b + ((a + F(b,c,d) + blk + itow(tableVal))), shiftAmt);
+//TODO: DABC X[1] failing, likely LEFT_ROTATE being passed backwards itow??
+inline Word FF(const Word& a, const Word& b, const Word& c,
+        const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
+    auto tableWord = itow(tableVal);
+    auto FWord = F(b,c,d);
+    return b + LEFT_ROTATE(itow(a.modAdd({ F(b,c,d), blk, itow(tableVal) })), shiftAmt);
+}
+
+inline Word GG(const Word& a, const Word& b, const Word&c,
+        const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
+    return b + LEFT_ROTATE(itow(a.modAdd({ G(b,c,d), blk, itow(tableVal) })), shiftAmt);
+}
+
+inline Word HH(const Word& a, const Word& b, const Word&c,
+               const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
+    return b + LEFT_ROTATE(itow(a.modAdd({ H(b,c,d), blk, itow(tableVal) })), shiftAmt);
+}
+
+inline Word II(const Word& a, const Word& b, const Word&c,
+               const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
+    return b + LEFT_ROTATE(itow(a.modAdd({ I(b,c,d), blk, itow(tableVal) })), shiftAmt);
 }
 
 /*
@@ -71,21 +89,27 @@ class md5 {
 public:
     // Four-word buffer used to compute the message digest.
 
-    static std::string getDigest(const std::string& msg);
+    static std::string getDigest(const std::string &msg);
 };
 
 /*
- * Abstracted collection for storing 16 blocks
+ * Abstracted collection for storing 16 words
  */
 class Block {
 public:
-    void add(const Word&& w); // Appends a word
-    unsigned int value(); // Returns value of the block
+    void add(byte b); // Adds a byte to the most recent block's word.
+    void add(const Word& w); // Appends a word
+    [[nodiscard]] inline Word at(int idx) const { return words[idx]; }
+    [[nodiscard]] inline bool isFull() const; // True if the block cannot store anymore bytes.
+    [[nodiscard]] unsigned int value() const; // Returns getBigValue of the block
 
-    Block() = default; // Default constructor, zeros properties out
+    Block(); // Default constructor, zeros properties out
+
+    void printDebug(); // Prints getBigValue of each word in block.
+    Word& back(); // Returns the last added word in the block
 private:
     Word words[16]; // Holds words of a block
-    int ip = 0; // Point for inserting next word
+    int ip = 1; // Point for inserting next word
 };
 
 /*
@@ -94,7 +118,12 @@ private:
 class Message {
 public:
     Message(const std::string& msg, unsigned int zeroBytesCount, unsigned int msgBitLen);
-    void add(byte b);
+    void add(byte b); // Adds a byte to the most recent message's block
+    void add(const Word& w); // Adds a word to the most recent message's block
+    [[nodiscard]] inline bool empty() const { return chunks.empty(); }
+    Block popBlock(); // Removes and returns the next block
+
+    void printDebug(); // Prints getBigValue of each block in message.
 private:
     std::vector<Block> chunks;
 };

@@ -21,13 +21,17 @@ bin::Word bin::itow(uint32_t val) {
     return Word(bytes, 4); // Let constructor handle host-endianness.
 }
 
-std::vector<byte> bin::i64tb(uint64_t src) {
+std::vector<bin::Word> bin::i64tw(uint64_t src) {
     std::vector<byte> bytes;
+    std::vector<Word> words;
 
     for (unsigned int i = 0; i < 8; ++i)
         bytes.push_back( (src >> (i * U8)) & static_cast<unsigned int>(0xFF));
 
-    return bytes;
+    words.emplace_back(Word({bytes[0], bytes[1], bytes[2], bytes[3]}));
+    words.emplace_back(Word({bytes[4], bytes[5], bytes[6], bytes[7]}));
+
+    return words;
 }
 
 bool bin::systemIsLittleEndian() {
@@ -58,7 +62,7 @@ bin::Word bin::Word::operator|(const bin::Word &other) const {
     Word w;
 
     for (int i = 0; i < BYTES_IN_WORD; i++)
-        w.append(bytes[i] ^ other[i]);
+        w.append(bytes[i] | other[i]);
 
     return w;
 }
@@ -95,9 +99,27 @@ uint32_t bin::Word::value() const {
     return btoi(bytes);
 }
 
+
 void bin::Word::ensureLittleEndian(Endian type) {
     bool needsConversion = (type == Endian::SYSTEM && !systemIsLittleEndian()) || (type == Endian::BIG);
 
     if (needsConversion)
         std::reverse(bytes, bytes + BYTES_IN_WORD);
+}
+
+
+void bin::Word::add(byte b) {
+    if (systemIsLittleEndian())
+        bytes[ip++] = b;
+    else {
+        ++ip;
+        bytes[BYTES_IN_WORD - ip] = b;
+    }
+}
+
+uint32_t bin::Word::modAdd(std::initializer_list<Word> words) const {
+    unsigned long sum = value();
+    for (auto iter = words.begin(); iter != words.end(); ++iter)
+        sum += iter->value();
+    return static_cast<uint32_t>(sum % static_cast<unsigned long>(std::pow(2, 32)));
 }
