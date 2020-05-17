@@ -64,7 +64,7 @@ namespace bin {
         int ip = 0; // Point to insert next byte into bytes array.
 
         void append(byte b); // Adds a byte to the bytes array (if not already full)
-        void ensureLittleEndian(Endian type); // Converts a newly constructed Word to little endian, if type so requires
+        void ensureLittleEndian(Endian type, unsigned int byteCount); // Converts a newly constructed Word to little endian, if type so requires
     };
 }
 

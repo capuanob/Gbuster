@@ -47,15 +47,15 @@ void bin::Word::append(byte b) {
 
 bin::Word::Word(const byte* pBytes, int byteCount, Endian type) {
     unsigned int insertionIdx = BYTES_IN_WORD - byteCount;
-    std::copy(pBytes, pBytes + byteCount, bytes + insertionIdx);
-    ensureLittleEndian(type);
+    std::copy(pBytes, pBytes + byteCount, bytes);
+    ensureLittleEndian(type, byteCount);
 }
 
 
 bin::Word::Word(std::initializer_list<byte> lBytes, Endian type) {
     unsigned int insertionIdx = BYTES_IN_WORD - lBytes.size();
-    std::copy(lBytes.begin(), lBytes.end(), bytes + insertionIdx);
-    ensureLittleEndian(type);
+    std::copy(lBytes.begin(), lBytes.end(), bytes);
+    ensureLittleEndian(type, lBytes.size());
 }
 
 bin::Word bin::Word::operator|(const bin::Word &other) const {
@@ -99,11 +99,11 @@ uint32_t bin::Word::value() const {
 }
 
 
-void bin::Word::ensureLittleEndian(Endian type) {
+void bin::Word::ensureLittleEndian(Endian type, unsigned int byteCount) {
     bool needsConversion = (type == Endian::SYSTEM && !systemIsLittleEndian()) || (type == Endian::BIG);
 
     if (needsConversion)
-        std::reverse(bytes, bytes + BYTES_IN_WORD);
+        std::reverse(bytes, bytes + byteCount);
 }
 
 

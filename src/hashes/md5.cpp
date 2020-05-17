@@ -132,7 +132,6 @@ std::string md5::getDigest(const std::string &msg) {
     for (int i = 0; i < 16; ++i)
         ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned int>(buffer[i]);
 
-    std::cout << "Digest: " << ss.str() << " | End digest" << std::endl;
     return std::string(ss.str());
 }
 
