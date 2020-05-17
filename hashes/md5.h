@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include "binary.h"
 
 using namespace bin;
@@ -44,7 +45,7 @@ constexpr unsigned int S[] = {
 };
 
 // Four MD5 auxiliary functions
-inline Word F(Word X, Word Y, Word Z) { return (X & Y) | (~X & Z); } // Conditional
+inline Word F(Word X, Word Y, Word Z) { return (X & Y) | (~(X) & Z); } // Conditional
 inline Word G(Word X, Word Y, Word Z) { return (X & Z) | (Y & ~Z); }
 inline Word H(Word X, Word Y, Word Z) { return X ^ Y ^ Z; }
 inline Word I(Word X, Word Y, Word Z) { return Y ^ (X | ~Z); }
@@ -53,27 +54,24 @@ inline Word LEFT_ROTATE(const Word wrd, unsigned int amt) {
     return itow((wrd.value() << amt) | (wrd.value() >> (U32 - amt)));
 }
 
-//TODO: DABC X[1] failing, likely LEFT_ROTATE being passed backwards itow??
 inline Word FF(const Word& a, const Word& b, const Word& c,
         const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
-    auto tableWord = itow(tableVal);
-    auto FWord = F(b,c,d);
-    return b + LEFT_ROTATE(itow(a.modAdd({ F(b,c,d), blk, itow(tableVal) })), shiftAmt);
+    return b + LEFT_ROTATE(a + F(b,c,d) + blk + itow(tableVal), shiftAmt);
 }
 
 inline Word GG(const Word& a, const Word& b, const Word&c,
         const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
-    return b + LEFT_ROTATE(itow(a.modAdd({ G(b,c,d), blk, itow(tableVal) })), shiftAmt);
+    return b + LEFT_ROTATE(a + G(b,c,d) + blk + itow(tableVal), shiftAmt);
 }
 
 inline Word HH(const Word& a, const Word& b, const Word&c,
                const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
-    return b + LEFT_ROTATE(itow(a.modAdd({ H(b,c,d), blk, itow(tableVal) })), shiftAmt);
+    return b + LEFT_ROTATE(a + H(b,c,d) + blk + itow(tableVal), shiftAmt);
 }
 
 inline Word II(const Word& a, const Word& b, const Word&c,
                const Word& d, const Word& blk, unsigned int shiftAmt, unsigned int tableVal) {
-    return b + LEFT_ROTATE(itow(a.modAdd({ I(b,c,d), blk, itow(tableVal) })), shiftAmt);
+    return b + LEFT_ROTATE(a + I(b,c,d) + blk + itow(tableVal), shiftAmt);
 }
 
 /*

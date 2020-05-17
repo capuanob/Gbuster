@@ -91,8 +91,7 @@ bin::Word bin::Word::operator^(const bin::Word &other) const {
 }
 
 bin::Word bin::Word::operator+(const bin::Word &other) const {
-    auto moddedVal = static_cast<uint32_t>((value() + other.value()) % static_cast<int>(pow(2, 32)));
-    return itow(moddedVal);
+    return itow(value() + other.value());
 }
 
 uint32_t bin::Word::value() const {

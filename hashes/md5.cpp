@@ -19,7 +19,7 @@ std::string md5::getDigest(const std::string &msg) {
 
 
     Message m(msg, zeroCount / 8, msgLen);
-    m.printDebug();
+
     /// Process Message in 16-Word Blocks
 
     while (!m.empty()) { // Ensures each chunk is processed
@@ -50,7 +50,7 @@ std::string md5::getDigest(const std::string &msg) {
         D = FF(D, A, B, C, X[9], S[rndBase+9], T[rndBase+9]);
         C = FF(C, D, A, B, X[10], S[rndBase+10], T[rndBase+10]);
         B = FF(B, C, D, A, X[11], S[rndBase+11], T[rndBase+11]);
-        C = FF(A, B, C, D, X[12], S[rndBase+12], T[rndBase+12]);
+        A = FF(A, B, C, D, X[12], S[rndBase+12], T[rndBase+12]);
         D = FF(D, A, B, C, X[13], S[rndBase+13], T[rndBase+13]);
         C = FF(C, D, A, B, X[14], S[rndBase+14], T[rndBase+14]);
         B = FF(B, C, D, A, X[15], S[rndBase+15], T[rndBase+15]);
@@ -70,7 +70,7 @@ std::string md5::getDigest(const std::string &msg) {
         D = GG(D, A, B, C, X[14], S[rndBase+9], T[rndBase+9]);
         C = GG(C, D, A, B, X[3], S[rndBase+10], T[rndBase+10]);
         B = GG(B, C, D, A, X[8], S[rndBase+11], T[rndBase+11]);
-        C = GG(A, B, C, D, X[13], S[rndBase+12], T[rndBase+12]);
+        A = GG(A, B, C, D, X[13], S[rndBase+12], T[rndBase+12]);
         D = GG(D, A, B, C, X[2], S[rndBase+13], T[rndBase+13]);
         C = GG(C, D, A, B, X[7], S[rndBase+14], T[rndBase+14]);
         B = GG(B, C, D, A, X[12], S[rndBase+15], T[rndBase+15]);
@@ -89,7 +89,7 @@ std::string md5::getDigest(const std::string &msg) {
         D = HH(D, A, B, C, X[0], S[rndBase+9], T[rndBase+9]);
         C = HH(C, D, A, B, X[3], S[rndBase+10], T[rndBase+10]);
         B = HH(B, C, D, A, X[6], S[rndBase+11], T[rndBase+11]);
-        C = HH(A, B, C, D, X[9], S[rndBase+12], T[rndBase+12]);
+        A = HH(A, B, C, D, X[9], S[rndBase+12], T[rndBase+12]);
         D = HH(D, A, B, C, X[12], S[rndBase+13], T[rndBase+13]);
         C = HH(C, D, A, B, X[15], S[rndBase+14], T[rndBase+14]);
         B = HH(B, C, D, A, X[2], S[rndBase+15], T[rndBase+15]);
@@ -108,7 +108,7 @@ std::string md5::getDigest(const std::string &msg) {
         D = II(D, A, B, C, X[15], S[rndBase+9], T[rndBase+9]);
         C = II(C, D, A, B, X[6], S[rndBase+10], T[rndBase+10]);
         B = II(B, C, D, A, X[13], S[rndBase+11], T[rndBase+11]);
-        C = II(A, B, C, D, X[4], S[rndBase+12], T[rndBase+12]);
+        A = II(A, B, C, D, X[4], S[rndBase+12], T[rndBase+12]);
         D = II(D, A, B, C, X[11], S[rndBase+13], T[rndBase+13]);
         C = II(C, D, A, B, X[2], S[rndBase+14], T[rndBase+14]);
         B = II(B, C, D, A, X[9], S[rndBase+15], T[rndBase+15]);
@@ -122,15 +122,18 @@ std::string md5::getDigest(const std::string &msg) {
     // Get output of MD5 algorithm
 
     std::stringstream ss;
-    std::string hexDigest;
-    ss        << std::hex << A.value()
-              << std::hex << B.value()
-              << std::hex << C.value()
-              << std::hex << D.value()
-              << std::endl;
+    byte buffer[16];
 
-    ss >> hexDigest;
-    return hexDigest;
+    std::copy(std::begin(A.bytes), std::end(A.bytes), std::begin(buffer));
+    std::copy(std::begin(B.bytes), std::end(B.bytes), std::begin(buffer) + 4);
+    std::copy(std::begin(C.bytes), std::end(C.bytes), std::begin(buffer) + 8);
+    std::copy(std::begin(D.bytes), std::end(D.bytes), std::begin(buffer) + 12);
+
+    for (int i = 0; i < 16; ++i)
+        ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned int>(buffer[i]);
+
+    std::cout << "Digest: " << ss.str() << " | End digest" << std::endl;
+    return std::string(ss.str());
 }
 
 void Block::add(const Word& w) {
