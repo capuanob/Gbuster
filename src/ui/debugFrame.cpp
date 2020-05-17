@@ -7,7 +7,7 @@
 DebugFrame::DebugFrame(wxWindow* parent, const wxString &title, const wxPoint &pos, const wxSize &size)
 : wxFrame(parent, wxID_ANY, title, pos, size)
 {
-    md5Panel = new HashTestPanel(this, "MD5", md5::getDigest);
+    md5Panel = new hashTestPanel(this, "MD5", md5::getDigest);
 
     Layout();
 }

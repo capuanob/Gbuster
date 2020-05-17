@@ -2,9 +2,6 @@
 // Created by bailey on 5/16/20.
 //
 
-#include "lib/googletest-master/googletest/include/gtest/gtest.h"
-#include "md5.h"
-
 // Test output of MD5 using RFC 1321 Examples
 TEST(basic_check, test_eq) {
     EXPECT_EQ(md5::getDigest(""), "d41d8cd98f00b204e9800998ecf8427e");

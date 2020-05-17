@@ -278,7 +278,7 @@ static const int kFuchsiaReadPipeFd = 3;
 enum DeathTestOutcome { IN_PROGRESS, DIED, LIVED, RETURNED, THREW };
 
 // Routine for aborting the program which is safe to call from an
-// exec-style death test child process, in which case the error
+// src-style death test child process, in which case the error
 // message is propagated back to the parent process.  Otherwise, the
 // message is simply printed to stderr.  In either case, the program
 // then exits with status 1.
@@ -1221,7 +1221,7 @@ class Arguments {
 // A struct that encompasses the arguments to the child process of a
 // threadsafe-style death test process.
 struct ExecDeathTestArgs {
-  char* const* argv;  // Command-line arguments for the child's call to exec
+  char* const* argv;  // Command-line arguments for the child's call to src
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 
@@ -1305,7 +1305,7 @@ static bool StackGrowsDown() {
 
 // Spawns a child process with the same executable as the current process in
 // a thread-safe manner and instructs it to run the death test.  The
-// implementation uses fork(2) + exec.  On systems where clone(2) is
+// implementation uses fork(2) + src.  On systems where clone(2) is
 // available, it is used instead, being slightly more thread-safe.  On QNX,
 // fork supports only single-threaded environments, so this function uses
 // spawn(2) there instead.  The function dies with an error message if
@@ -1406,7 +1406,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
   return child_pid;
 }
 
-// The AssumeRole process for a fork-and-exec death test.  It re-executes the
+// The AssumeRole process for a fork-and-src death test.  It re-executes the
 // main program from the beginning, setting the --gtest_filter
 // and --gtest_internal_run_death_test flags to cause only the current
 // death test to be re-run.
@@ -1424,8 +1424,8 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
 
   int pipe_fd[2];
   GTEST_DEATH_TEST_CHECK_(pipe(pipe_fd) != -1);
-  // Clear the close-on-exec flag on the write end of the pipe, lest
-  // it be closed when the child process does an exec:
+  // Clear the close-on-src flag on the write end of the pipe, lest
+  // it be closed when the child process does an src:
   GTEST_DEATH_TEST_CHECK_(fcntl(pipe_fd[1], F_SETFD, 0) != -1);
 
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +

@@ -6,7 +6,7 @@
 #define GBUSTER_DEBUGFRAME_H
 
 #include <wx/frame.h>
-#include "HashTestPanel.h"
+#include "hashTestPanel.h"
 
 class DebugFrame: public wxFrame {
 public:
@@ -14,7 +14,7 @@ public:
     ~DebugFrame() override = default;
 
 private:
-    HashTestPanel* md5Panel;
+    hashTestPanel* md5Panel;
 };
 
 #endif //GBUSTER_DEBUGFRAME_H

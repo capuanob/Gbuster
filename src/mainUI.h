@@ -2,10 +2,10 @@
 // Created by bailey on 5/8/20.
 //
 
-#ifndef GBUSTER_UI_H
-#define GBUSTER_UI_H
+#ifndef GBUSTER_MAINUI_H
+#define GBUSTER_MAINUI_H
 
-#include "gFrame.h"
+#include "ui/gFrame.h"
 
 class UI: public wxApp {
 private:
@@ -15,4 +15,4 @@ public:
     int OnExit() override;
 };
 
-#endif //GBUSTER_UI_H
+#endif //GBUSTER_MAINUI_H

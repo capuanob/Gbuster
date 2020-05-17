@@ -1,7 +1,6 @@
-include_directories(../lib/googletest-master/googletest/include)
-include_directories(../lib/googletest-master/googlemock/include)
+cmake_minimum_required(VERSION 3.16)
+project(Gbuster_basic_tests)
 
-add_executable(runBasicGBusterTests hashTests.cpp)
-
-target_link_libraries(runBasicGBusterTests gtest gtest_main)
-target_link_libraries(runBasicGBusterTests exec)
+set(BASIC_TESTS_SOURCES
+        hashTests.cpp
+)

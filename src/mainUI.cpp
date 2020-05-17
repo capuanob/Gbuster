@@ -2,7 +2,7 @@
 // Created by bailey on 5/8/20.
 //
 
-#include "UI.h"
+#include "mainUI.h"
 
 bool UI::OnInit() {
     frame = new GFrame("Gbuster", wxPoint(50, 50), wxSize(450, 340));

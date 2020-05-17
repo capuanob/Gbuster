@@ -15,10 +15,10 @@
 #include "md5.h"
 #include "IDs.h"
 
-class HashTestPanel: public wxPanel {
+class hashTestPanel: public wxPanel {
 public:
-    HashTestPanel(wxWindow* parent, const wxString& lbl, std::function<std::string(std::string)> fnc);
-    ~HashTestPanel() override = default;
+    hashTestPanel(wxWindow* parent, const wxString& lbl, std::function<std::string(std::string)> fnc);
+    ~hashTestPanel() override = default;
 
     void OnPress(wxCommandEvent& event);
     void OnTextDidChange(wxCommandEvent& event);
