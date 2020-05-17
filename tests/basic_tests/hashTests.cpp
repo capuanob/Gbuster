@@ -7,8 +7,6 @@
 #include <iostream>
 
 TEST(md5_test, digest_eq) {
-    std::cout << "Testing MD5 Digests..." << std::endl;
-
     // Testing digests provided by RFC 1321 on MD5
     EXPECT_EQ(md5::getDigest(""),
             "d41d8cd98f00b204e9800998ecf8427e");
@@ -30,7 +28,5 @@ TEST(md5_test, digest_eq) {
 
     EXPECT_EQ(md5::getDigest("12345678901234567890123456789012345678901234567890123456789012345678901234567890"),
             "57edf4a22be3c955ac49da2e2107b67a");
-
-    std::cout << "PASSED!" << std::endl;
 }
 

@@ -35,7 +35,7 @@ namespace bin {
 
     // ALL HELPER FUNCTIONS ASSUME LITTLE-ENDIAN ORDERING
     Word itow(uint32_t val); // Converts a 32-bit integer value to a little-endian Word
-    uint32_t btoi(const byte* bytes); // Converts a little-endian array of bytes (4) to a 32-bit big-endian int
+    uint32_t btoi(const byte* bytes); // Converts a little-endian array of bytes (exactly size 4) to a 32-bit big-endian int
     std::vector<Word> i64tw(uint64_t src); // Splits a 64-bit integer into a host-endian vector of 8 bytes.
 
     bool systemIsLittleEndian(); // Determines whether or not the host CPU is big or little endian.
@@ -46,7 +46,6 @@ namespace bin {
 
         [[nodiscard]] inline bool isFull() const { return ip >= BYTES_IN_WORD; } // True if the word cannot store any additional bytes
         void add(byte b); // Inserts a byte in little-endian order.
-        [[nodiscard]] uint32_t modAdd(std::initializer_list<Word> words) const; // Adds words and applies the modulus operator to the result
 
         Word(const byte* lBytes, int byteCount, Endian type = Endian::SYSTEM); // Array-based constructor
         Word(std::initializer_list<byte> lBytes, Endian type = Endian::SYSTEM); // Initializer list constructor

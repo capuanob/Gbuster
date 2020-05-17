@@ -115,10 +115,3 @@ void bin::Word::add(byte b) {
         bytes[BYTES_IN_WORD - ip] = b;
     }
 }
-
-uint32_t bin::Word::modAdd(std::initializer_list<Word> words) const {
-    unsigned long sum = value();
-    for (auto iter = words.begin(); iter != words.end(); ++iter)
-        sum += iter->value();
-    return static_cast<uint32_t>(sum % static_cast<unsigned long>(std::pow(2, 32)));
-}
