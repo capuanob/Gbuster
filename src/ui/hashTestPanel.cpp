@@ -2,11 +2,11 @@
 // Created by bailey on 5/10/20.
 //
 
-#include "HashTestPanel.h"
+#include "hashTestPanel.h"
 
 #include <utility>
 
-HashTestPanel::HashTestPanel(wxWindow* parent, const wxString& lbl, std::function<std::string(std::string)> fnc)
+hashTestPanel::hashTestPanel(wxWindow* parent, const wxString& lbl, std::function<std::string(std::string)> fnc)
 : wxPanel(parent)
 {
     this->hashFunc = std::move(fnc);
@@ -32,22 +32,22 @@ HashTestPanel::HashTestPanel(wxWindow* parent, const wxString& lbl, std::functio
     SetSizerAndFit(boxSizer);
 }
 
-void HashTestPanel::OnPress(wxCommandEvent &event) {
+void hashTestPanel::OnPress(wxCommandEvent &event) {
     std::string cleartext = getTextBoxValue();
     std::string digest = hashFunc(cleartext);
     hashOutputLabel->SetLabel("Message Digest: " + digest);
 }
 
-std::string HashTestPanel::getTextBoxValue() {
+std::string hashTestPanel::getTextBoxValue() {
     return std::string(textBox->GetValue().mbc_str());
 }
 
-BEGIN_EVENT_TABLE(HashTestPanel, wxPanel)
-    EVT_BUTTON(ID_HASH, HashTestPanel::OnPress)
-    EVT_TEXT(ID_TXTBOX, HashTestPanel::OnTextDidChange)
+BEGIN_EVENT_TABLE(hashTestPanel, wxPanel)
+    EVT_BUTTON(ID_HASH, hashTestPanel::OnPress)
+    EVT_TEXT(ID_TXTBOX, hashTestPanel::OnTextDidChange)
 END_EVENT_TABLE()
 
-void HashTestPanel::OnTextDidChange(wxCommandEvent &event) {
+void hashTestPanel::OnTextDidChange(wxCommandEvent &event) {
     wxString curr_str = event.GetString();
 
     if (charCount != nullptr) // Creation of textBox emits an EVT_TEXT, have to avoid that
