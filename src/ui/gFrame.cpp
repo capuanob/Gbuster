@@ -13,7 +13,7 @@ void GFrame::OnExit(wxCommandEvent &event) {
 }
 
 void GFrame::OnLoad(wxCommandEvent &event) {
-    md5::getDigest("5r09r030450t0gd00sqallf0v0s0a0505slxlDKFKFLSL%#)@)!)!)@8");
+    return;
 }
 
 
@@ -50,6 +50,6 @@ void GFrame::loadMainUI() {
 
 void GFrame::OnTestMD5(wxCommandEvent &event) {
     auto *debugFrame = new DebugFrame(this, "Admin Panel",
-            wxPoint(50, 50), wxSize(450, 600));
+            wxDefaultPosition, wxSize(450, 600));
     debugFrame->Show(true);
 }
