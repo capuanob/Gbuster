@@ -5,11 +5,11 @@ set(SRC_SOURCES mainUI.cpp)
 
 set(SRC_HEADERS
         mainUI.h
-)
+        foundation/hardware.cu foundation/hardware.cuh foundation/CpuHardware.cpp foundation/CpuHardware.h)
 
 add_subdirectory(hashes)
 add_subdirectory(ui)
-
+add_subdirectory(foundation)
 
 # Set up wxWidgets
 find_package(wxWidgets COMPONENTS core base REQUIRED)

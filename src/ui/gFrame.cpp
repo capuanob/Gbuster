@@ -13,13 +13,32 @@ void GFrame::OnExit(wxCommandEvent &event) {
 }
 
 void GFrame::OnLoad(wxCommandEvent &event) {
-    return;
+    wxFileDialog openFileDialog(this, "Choose a hash list",
+            "", "", "Text Files (*.txt)|*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+
+    if (openFileDialog.ShowModal() != wxID_OK) return;
+
+    // Open file
+    wxTextFile hashList(openFileDialog.GetPath());
+    if (!hashList.Open()) {
+        wxLogError("Cannot open file '%s'.", openFileDialog.GetFilename());
+        return;
+    }
+
+    HashModel model;
+    // Store hashes in program's model
+    for (auto& str = hashList.GetFirstLine(); !hashList.Eof(); str = hashList.GetNextLine())
+        model.add_hash(std::string(str));
+
+    hashList.Close();
+    loadMainUI(model);
 }
 
 
 GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     : wxFrame(nullptr, wxID_ANY, title, pos, size)
 {
+    topSizer = new wxBoxSizer(wxVERTICAL);
 
     auto *menuFile = new wxMenu;
     menuFile->Append(ID_Load, "&Load from file...\tCtrl-L",
@@ -38,14 +57,18 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     menuBar->Append( menuHelp, "&Help" );
     menuBar->Append( menuDebug, "&Debug" );
 
+    SetSizer(topSizer);
     SetMenuBar(menuBar);
     CreateStatusBar();
     SetStatusText( "Welcome to Gbuster!" );
 
 }
 
-void GFrame::loadMainUI() {
+void GFrame::loadMainUI(HashModel& model) {
+    auto* mainPanel = new MainPanel(this, std::move(model));
+    topSizer->Add(mainPanel, 0, wxEXPAND);
 
+    Layout();
 }
 
 void GFrame::OnTestMD5(wxCommandEvent &event) {

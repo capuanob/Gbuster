@@ -129,10 +129,9 @@ std::string md5::getDigest(const std::string &msg) {
     std::copy(std::begin(C.bytes), std::end(C.bytes), std::begin(buffer) + 8);
     std::copy(std::begin(D.bytes), std::end(D.bytes), std::begin(buffer) + 12);
 
-    for (int i = 0; i < 16; ++i)
-        ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned int>(buffer[i]);
+    for (unsigned char i : buffer)
+        ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned int>(i);
 
-    std::cout << "Digest: " << ss.str() << " | End digest" << std::endl;
     return std::string(ss.str());
 }
 

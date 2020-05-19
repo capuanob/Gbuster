@@ -8,6 +8,8 @@
 #include "ui/gFrame.h"
 #include "wx/display.h" // Screen size and monitor handling
 
+using displayInfo = std::pair<unsigned int, unsigned int>; // Pair of (display index, display x offset)
+
 class UI: public wxApp {
 private:
     wxFrame* frame;
