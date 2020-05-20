@@ -6,7 +6,6 @@
 #define GBUSTER_HASHMODEL_H
 
 #include <unordered_set>
-#include "md5.h"
 
 /**
  * This class serves as the model in the application's MVC architecture. It handles storage of properties
@@ -22,8 +21,8 @@ public:
      * @param hash Hash to be added
      */
     inline void add_hash(const std::string& hash) { hashes.insert(hash); }
+    inline unsigned long size() const noexcept { return hashes.size(); }
 
-    inline unsigned long size() const { return hashes.size(); }
     HashModel() = default;
     ~HashModel() = default;
 private:

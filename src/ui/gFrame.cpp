@@ -41,8 +41,8 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     topSizer = new wxBoxSizer(wxVERTICAL);
 
     auto *menuFile = new wxMenu;
-    menuFile->Append(ID_Load, "&Load from file...\tCtrl-L",
-            "Load a password hash dump from a file.");
+    menuFile->Append(ID_LOAD, "&Load from file...\tCtrl-L",
+                     "Load a password hash dump from a file.");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 

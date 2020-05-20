@@ -22,10 +22,10 @@ enum class Endian {
 namespace bin {
 
     // Unsigned integers for bitwise operations, makes linter happy :)
-    constexpr uint8_t U8 = 8;
-    constexpr uint8_t U16 = 16;
-    constexpr uint8_t U24 = 24;
-    constexpr uint8_t U32 = 32;
+    extern uint8_t U8;
+    extern uint8_t U16;
+    extern uint8_t U24;
+    extern uint8_t U32;
 
     /*
      * Internal representation of a word (aka 4 bytes), with useful helper functions and overrides
@@ -44,9 +44,8 @@ namespace bin {
     public:
         [[nodiscard]] uint32_t value() const; // Returns 32-bit little-endian value
 
-        [[nodiscard]] inline bool isFull() const { return ip >= BYTES_IN_WORD; } // True if the word cannot store any additional bytes
+        [[nodiscard]] constexpr inline bool isFull() const { return ip >= BYTES_IN_WORD; } // True if the word cannot store any additional bytes
         void add(byte b); // Inserts a byte in little-endian order.
-        [[nodiscard]] uint32_t modAdd(std::initializer_list<Word> words) const; // Adds words and applies the modulus operator to the result
 
         Word(const byte* lBytes, int byteCount, Endian type = Endian::SYSTEM); // Array-based constructor
         Word(std::initializer_list<byte> lBytes, Endian type = Endian::SYSTEM); // Initializer list constructor

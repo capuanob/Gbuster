@@ -10,6 +10,7 @@ set(SRC_HEADERS
 add_subdirectory(hashes)
 add_subdirectory(ui)
 add_subdirectory(foundation)
+add_subdirectory(threading)
 
 # Set up wxWidgets
 find_package(wxWidgets COMPONENTS core base REQUIRED)

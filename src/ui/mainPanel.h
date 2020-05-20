@@ -5,17 +5,21 @@
 #ifndef GBUSTER_MAINPANEL_H
 #define GBUSTER_MAINPANEL_H
 
-#include <wx/panel.h>
+#ifndef PANEL_INCLUDES
+#define PANEL_INCLUDES
+#include <wx/panel.h> // Panel inheritance
 #include <wx/sizer.h>
-#include <wx/stattext.h> // Labels
-#include <wx/font.h> // Styling
-#include <wx/combobox.h> // Dropdown boxes
-#include <wx/checkbox.h> // character set selection
-#include <wx/statbox.h>
-#include <wx/button.h>
-#include <memory> // unique ptr
-#include "hashModel.h"
-#include "CpuHardware.h"
+#include "IDs.h"
+#include "hashModel.h" // Application's model
+#endif // PANEL_INCLUDES
+
+
+#include <wx/combobox.h>
+#include <wx/stattext.h> // labels
+#include <wx/checkbox.h>
+#include "CpuHardware.h" // Getting thread count
+#include "../threading/cpu/scheduler.h" // Work allotment
+#include "characterSets.h"
 
 class LabelledComboBox : public wxPanel {
 public:
@@ -28,10 +32,9 @@ public:
      */
     static std::vector<wxString> getWorkloadOptions();
 private:
-    wxBoxSizer* szr;
-    wxStaticText* lbl;
-    wxComboBox* box;
-
+    wxBoxSizer* szr = nullptr;
+    wxStaticText* lbl = nullptr;
+    wxComboBox* box = nullptr;
 };
 
 class MainPanel : public wxPanel {
@@ -39,6 +42,8 @@ public:
     explicit MainPanel(wxWindow* parent, HashModel&& model);
     ~MainPanel() override = default;
 
+    // Event handling
+    void OnCrackBtnPressed(wxCommandEvent& event); // Handles set-up and execution of a brute-force attack
 private:
 
     void SetUp(); // Sets up the controls
@@ -47,21 +52,23 @@ private:
     wxFont labelFont{15, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
     wxFont btnFont{20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL};
     // Combo boxes
-    wxStaticText* countLabel;
-    LabelledComboBox* hashBox;
-    LabelledComboBox* deviceBox;
-    LabelledComboBox* workloadBox;
-    LabelledComboBox* temperatureBox;
+    wxStaticText* countLabel = nullptr;
+    LabelledComboBox* hashBox = nullptr;
+    LabelledComboBox* deviceBox = nullptr;
+    LabelledComboBox* workloadBox = nullptr;
+    LabelledComboBox* temperatureBox = nullptr;
 
     // Check boxes
-    wxCheckBox* capitalLetters;
-    wxCheckBox* lowercaseLetters;
-    wxCheckBox* numeric;
-    wxCheckBox* symbols;
+    wxCheckBox* capitalLetters = nullptr;
+    wxCheckBox* lowercaseLetters = nullptr;
+    wxCheckBox* numeric = nullptr;
+    wxCheckBox* symbols = nullptr;
 
-    wxButton* crackButton;
+    wxButton* crackButton = nullptr;
 
     wxBoxSizer* topSizer = new wxBoxSizer(wxVERTICAL);
+
+    wxDECLARE_EVENT_TABLE();
 };
 
 

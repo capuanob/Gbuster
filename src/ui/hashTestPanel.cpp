@@ -4,19 +4,17 @@
 
 #include "hashTestPanel.h"
 
-#include <utility>
-
 hashTestPanel::hashTestPanel(wxWindow* parent, const wxString& lbl, std::function<std::string(std::string)> fnc)
 : wxPanel(parent)
 {
     this->hashFunc = std::move(fnc);
 
     charCount = new wxStaticText(this, -1, "c", wxDefaultPosition, wxDefaultSize);
-    textBox = new wxTextCtrl(this, ID_TXTBOX, wxT("Text to hash:"),
+    textBox = new wxTextCtrl(this, ID_HASH_TEXT_BOX, wxT("Text to hash:"),
                              wxDefaultPosition, wxSize(450, 40));
     hashOutputLabel = new wxStaticText(this, -1,
                                        "Message Digest: ", wxDefaultPosition, wxSize(450, 100));
-    hashButton = new wxButton(this, ID_HASH, lbl, wxDefaultPosition, wxDefaultSize);
+    hashButton = new wxButton(this, ID_TEST_HASH, lbl, wxDefaultPosition, wxDefaultSize);
 
     auto *boxSizer = new wxBoxSizer(wxVERTICAL);
     auto *counterSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -43,8 +41,8 @@ std::string hashTestPanel::getTextBoxValue() {
 }
 
 BEGIN_EVENT_TABLE(hashTestPanel, wxPanel)
-    EVT_BUTTON(ID_HASH, hashTestPanel::OnPress)
-    EVT_TEXT(ID_TXTBOX, hashTestPanel::OnTextDidChange)
+    EVT_BUTTON(ID_TEST_HASH, hashTestPanel::OnPress)
+    EVT_TEXT(ID_HASH_TEXT_BOX, hashTestPanel::OnTextDidChange)
 END_EVENT_TABLE()
 
 void hashTestPanel::OnTextDidChange(wxCommandEvent &event) {

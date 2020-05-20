@@ -5,12 +5,10 @@
 #ifndef GBUSTER_GFRAME_H
 #define GBUSTER_GFRAME_H
 
-#include <wx/wx.h>
-#include <wx/textfile.h> // File chooser
-#include <wx/textfile.h> // File handling
-#include "debugFrame.h"
-#include "hashModel.h"
+#include <wx/frame.h> // Frame inheritance
+#include <wx/textfile.h>
 #include "mainPanel.h"
+#include "debugFrame.h"
 
 class GFrame: public wxFrame
 {

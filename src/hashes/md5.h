@@ -97,13 +97,12 @@ class Block {
 public:
     void add(byte b); // Adds a byte to the most recent block's word.
     void add(const Word& w); // Appends a word
-    [[nodiscard]] inline Word at(int idx) const { return words[idx]; }
-    [[nodiscard]] inline bool isFull() const; // True if the block cannot store anymore bytes.
-    [[nodiscard]] unsigned int value() const; // Returns getBigValue of the block
+    [[nodiscard]] constexpr inline Word at(int idx) const { return words[idx]; }
+    [[nodiscard]] constexpr inline bool isFull() const { return (ip > WORDS_IN_BLOCK) ||
+        (ip == WORDS_IN_BLOCK && words[ip - 1].isFull()); } // True if the block cannot store any more bytes
 
     Block(); // Default constructor, zeros properties out
 
-    void printDebug(); // Prints getBigValue of each word in block.
     Word& back(); // Returns the last added word in the block
 private:
     Word words[16]; // Holds words of a block
@@ -120,8 +119,6 @@ public:
     void add(const Word& w); // Adds a word to the most recent message's block
     [[nodiscard]] inline bool empty() const { return chunks.empty(); }
     Block popBlock(); // Removes and returns the next block
-
-    void printDebug(); // Prints getBigValue of each block in message.
 private:
     std::vector<Block> chunks;
 };

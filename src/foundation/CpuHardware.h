@@ -10,8 +10,7 @@
 class CpuHardware {
 public:
     /**
-     * Determines the number of concurrent threads supported by the implementation
-     * @return the above number
+     * @return The number of concurrent threads supported by the implementation
      */
     inline static unsigned int getMaximumThreads() {  return std::thread::hardware_concurrency(); }
 };

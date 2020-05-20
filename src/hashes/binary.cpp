@@ -4,6 +4,11 @@
 
 #include "binary.h"
 
+uint8_t bin::U8 = 8;
+uint8_t bin::U16 = 16;
+uint8_t bin::U24 = 24;
+uint8_t bin::U32 = 32;
+
 uint32_t bin::btoi(const byte* bytes) {
     return static_cast<uint32_t>(bytes[0] | (bytes[1] << U8) | (bytes[2] << U16) | (bytes[3] << U24));
 }
@@ -114,11 +119,4 @@ void bin::Word::add(byte b) {
         ++ip;
         bytes[BYTES_IN_WORD - ip] = b;
     }
-}
-
-uint32_t bin::Word::modAdd(std::initializer_list<Word> words) const {
-    unsigned long sum = value();
-    for (auto iter = words.begin(); iter != words.end(); ++iter)
-        sum += iter->value();
-    return static_cast<uint32_t>(sum % static_cast<unsigned long>(std::pow(2, 32)));
 }

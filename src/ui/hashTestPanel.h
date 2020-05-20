@@ -5,15 +5,15 @@
 #ifndef GBUSTER_HASHTESTPANEL_H
 #define GBUSTER_HASHTESTPANEL_H
 
-#include <wx/textctrl.h>
-#include <wx/stattext.h>
+#ifndef PANEL_INCLUDES
+#define PANEL_INCLUDES
+#include <wx/panel.h> // Panel inheritance
 #include <wx/sizer.h>
-#include <wx/button.h>
-#include <wx/panel.h>
-#include <functional>
-
-#include "md5.h"
 #include "IDs.h"
+#endif // PANEL_INCLUDES
+
+#include <functional> // Passing of hash function
+
 
 class hashTestPanel: public wxPanel {
 public:

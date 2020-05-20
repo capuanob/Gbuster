@@ -141,20 +141,6 @@ void Block::add(const Word& w) {
     words[ip++] = w;
 }
 
-unsigned int Block::value() const {
-    if (ip != WORDS_IN_BLOCK)
-        throw std::logic_error("This block is half-cooked! Value would be useless.");
-
-    std::stringstream ss;
-    unsigned int val;
-
-    for (const auto& word : words)
-        ss << std::hex << word.value();
-
-    ss >> val;
-    return val;
-}
-
 void Block::add(byte b) {
     if (back().isFull()) {
         Word w({});
@@ -164,15 +150,6 @@ void Block::add(byte b) {
         back().add(b);
 }
 
-inline bool Block::isFull() const {
-    return (ip > WORDS_IN_BLOCK) || (ip == WORDS_IN_BLOCK && words[ip - 1].isFull());
-}
-
-void Block::printDebug() {
-    for (int i = 0; i < 16; ++i)
-        std::cout << "\t[" << i << "] " << words[i].value() << std::endl;
-    std::cout << std::endl;
-}
 
 Block::Block() {
     words[0] = Word({});
@@ -224,11 +201,4 @@ void Message::add(const Word& w) {
         new_block.add(w);
     } else
         chunks.back().add(w);
-}
-
-void Message::printDebug() {
-    for (int i = 0; i < chunks.size(); ++i) {
-        std::cout << "Block" << "[" << i << "] contains:" << std::endl;
-        chunks[i].printDebug();
-    }
 }

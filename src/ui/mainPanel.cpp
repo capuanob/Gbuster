@@ -81,7 +81,7 @@ void MainPanel::SetUp() {
     topSizer->Add(horizSizer, 0,wxLEFT, 20);
 
     /// Set up button
-    crackButton = new wxButton(this, wxID_ANY, "CRACK", wxDefaultPosition, wxSize(200, 50));
+    crackButton = new wxButton(this, ID_CRACK, "CRACK", wxDefaultPosition, wxSize(200, 50));
     crackButton->SetFont(btnFont);
     topSizer->AddSpacer(5);
     topSizer->Add(crackButton, 0, wxALIGN_RIGHT | wxRIGHT, 20);
@@ -109,9 +109,9 @@ LabelledComboBox::LabelledComboBox(wxWindow *parent, wxWindowID ID, int width, c
 std::vector<wxString> LabelledComboBox::getWorkloadOptions() {
     //FIXME: This will look ugly when getMaximumThreads returns 0 or < 4
     unsigned int maxThreads = CpuHardware::getMaximumThreads() - 1;
-    unsigned int heavyThreads = maxThreads * 0.75;
-    unsigned int mediumThreads = maxThreads * 0.5;
-    unsigned int lightThreads = maxThreads * 0.25;
+    unsigned int heavyThreads = static_cast<unsigned int>(maxThreads * 0.75);
+    unsigned int mediumThreads = static_cast<unsigned int>(maxThreads * 0.5);
+    unsigned int lightThreads = static_cast<unsigned int>(maxThreads * 0.25);
 
     std::vector<wxString> options;
     options.emplace_back("Unresponsive (" + std::to_string(maxThreads) + ") ");
@@ -120,4 +120,15 @@ std::vector<wxString> LabelledComboBox::getWorkloadOptions() {
     options.emplace_back("Light (" + std::to_string(lightThreads) + ") ");
 
     return options;
+}
+
+BEGIN_EVENT_TABLE(MainPanel, wxPanel)
+                EVT_BUTTON(ID_CRACK, MainPanel::OnCrackBtnPressed)
+END_EVENT_TABLE()
+
+void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
+    Scheduler sched(hash::CharacterSets::getCharacterSet(false, false, true, false), CpuHardware::getMaximumThreads(), 8);
+    int i = 0;
+    for (const auto& work : sched.getWorkDistribution())
+        std::cout << "Thread [" << i++ << "]:" << work.first << "-->" << work.second << std::endl;
 }
