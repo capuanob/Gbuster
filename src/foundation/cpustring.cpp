@@ -2,6 +2,7 @@
 // Created by bailey on 5/20/20.
 //
 
+#include <algorithm>
 #include "cpustring.h"
 
 hash::string::string(unsigned long len) {
@@ -49,7 +50,7 @@ unsigned long hash::string::getIndex(char c) {
         return characterSet.numOffset + (c - '0');
     else {
         return std::find(characterSet.char_set.begin() + characterSet.symbOffset, characterSet.char_set.end(), c)
-            - characterSet.char_set.begin();
+               - characterSet.char_set.begin();
     }
 }
 

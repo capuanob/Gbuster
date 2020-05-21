@@ -2,6 +2,7 @@
 // Created by bailey on 5/9/20.
 //
 
+#include <algorithm>
 #include "binary.h"
 
 uint8_t bin::U8 = 8;

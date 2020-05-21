@@ -127,7 +127,7 @@ BEGIN_EVENT_TABLE(MainPanel, wxPanel)
 END_EVENT_TABLE()
 
 void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
-    CharacterSet cs(true, true, true, false); //TODO: Get these values from UI
-    Scheduler sched(cs, CpuHardware::getMaximumThreads(), 9, model.getHashes());
+    CharacterSet cs(true, false, false, false); //TODO: Get these values from UI
+    Scheduler sched(cs, 2, 3, model.getHashes());
     sched.dispatchWorkers();
 }
