@@ -12,7 +12,8 @@ MainPanel::MainPanel(wxWindow *parent, HashModel&& model) : wxPanel(parent) {
 }
 
 void MainPanel::SetUp() {
-
+    /// Phil
+    auto* philLbl = new wxStaticText(this, wxID_ANY, "Test");
     /// Setup label
     wxString lbl{std::to_string(model.size()) + " hashes successfully loaded"};
     countLabel = new wxStaticText(this, wxID_ANY, lbl);
@@ -52,10 +53,12 @@ void MainPanel::SetUp() {
     temperatureBox = new LabelledComboBox(this, wxID_ANY, 75, temperatures,
             temperaturesSize, "Abort (C): ");
 
+
     workloadSizer->Add(workloadBox, 0, wxEXPAND);
     workloadSizer->AddSpacer(10);
     workloadSizer->Add(temperatureBox, 0, wxEXPAND);
     configSizer->Add(workloadSizer, 0, wxEXPAND | wxALL, 10);
+    configSizer->Add(philLbl, 0, wxEXPAND | wxALL, 10);
 
     horizSizer->Add(configSizer, 0);
 
