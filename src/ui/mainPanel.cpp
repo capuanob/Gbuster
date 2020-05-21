@@ -108,7 +108,7 @@ LabelledComboBox::LabelledComboBox(wxWindow *parent, wxWindowID ID, int width, c
 
 std::vector<wxString> LabelledComboBox::getWorkloadOptions() {
     //FIXME: This will look ugly when getMaximumThreads returns 0 or < 4
-    unsigned int maxThreads = CpuHardware::getMaximumThreads() - 1;
+    unsigned int maxThreads = cpuHardware::getMaximumThreads() - 1;
     auto heavyThreads = static_cast<unsigned int>(maxThreads * 0.75);
     auto mediumThreads = static_cast<unsigned int>(maxThreads * 0.5);
     auto lightThreads = static_cast<unsigned int>(maxThreads * 0.25);
@@ -127,7 +127,7 @@ BEGIN_EVENT_TABLE(MainPanel, wxPanel)
 END_EVENT_TABLE()
 
 void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
-    CharacterSet cs(true, true, true, false); //TODO: Get these values from UI
-    Scheduler sched(cs, CpuHardware::getMaximumThreads(), 9, model.getHashes());
+    characterSet cs(true, false, true, false); //TODO: Get these values from UI
+    Scheduler sched(cs, cpuHardware::getMaximumThreads(), 5, model.getHashes());
     sched.dispatchWorkers();
 }
