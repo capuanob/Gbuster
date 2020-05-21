@@ -84,5 +84,3 @@ void Scheduler::work(const hash::string &start,
         ++curr;
     }
 }
-
-// TESTING IF THIS SHIT WORKED
