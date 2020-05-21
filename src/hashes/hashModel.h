@@ -23,6 +23,7 @@ public:
     inline void add_hash(const std::string& hash) { hashes.insert(hash); }
     inline unsigned long size() const noexcept { return hashes.size(); }
 
+    inline std::unordered_set<std::string> getHashes() const noexcept { return hashes; }
     HashModel() = default;
     ~HashModel() = default;
 private:

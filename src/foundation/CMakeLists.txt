@@ -2,6 +2,7 @@ set(FOUNDATION_SOURCES
         CpuHardware.cpp
         hardware.cu
         cpustring.cpp
+        characterSets.cpp
 )
 
 set(FOUNDATION_HEADERS

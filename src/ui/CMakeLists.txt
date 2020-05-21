@@ -18,5 +18,5 @@ find_package(wxWidgets COMPONENTS core base REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 add_library(ui STATIC ${UI_SOURCES} ${UI_HEADERS})
-target_link_libraries(ui hash foundation ${wxWidgets_LIBRARIES})
+target_link_libraries(ui cpuThreading ${wxWidgets_LIBRARIES})
 target_include_directories(ui PUBLIC ./)

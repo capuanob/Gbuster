@@ -11,6 +11,7 @@
 #include <wx/sizer.h>
 #include "IDs.h"
 #include "hashModel.h" // Application's model
+#include "scheduler.h"
 #endif // PANEL_INCLUDES
 
 
@@ -19,7 +20,6 @@
 #include <wx/checkbox.h>
 #include "CpuHardware.h" // Getting thread count
 #include "../threading/cpu/scheduler.h" // Work allotment
-#include "characterSets.h"
 
 class LabelledComboBox : public wxPanel {
 public:
