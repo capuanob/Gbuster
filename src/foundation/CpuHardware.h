@@ -6,7 +6,8 @@
 #define GBUSTER_CPUHARDWARE_H
 #include <string>
 #include <thread>
-
+#include <cpuid.h>
+#include <cstring>
 class CpuHardware {
 public:
     /**

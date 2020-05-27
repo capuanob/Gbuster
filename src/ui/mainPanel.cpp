@@ -27,29 +27,28 @@ void MainPanel::SetUp() {
     // Set up hash type
     wxString hashOptions[] = { "MD5" };
     int contentSize = sizeof(hashOptions) / sizeof(hashOptions[0]);
-    hashBox = new LabelledComboBox(this, wxID_ANY, 75,
+    hashBox = new wxLabelledComboBox(this, 75,
                                          hashOptions, contentSize, "Hash type: ");
     configSizer->Add(hashBox, 0, wxEXPAND | wxALL, 10);
 
     // Set up device type
-
-    wxString deviceOptions[] = { "i9 9900k (CPU) "};
+    wxString deviceOptions[] = { "CPU", "CUDA-Compatible Nvidia GPU" };
     contentSize = sizeof(deviceOptions) / sizeof(deviceOptions[0]);
-    deviceBox = new LabelledComboBox(this, wxID_ANY, 150,
+    deviceBox = new wxLabelledComboBox(this, 150,
             deviceOptions, contentSize, "Use device: ");
     configSizer->Add(deviceBox, 0, wxEXPAND | wxALL, 10);
 
     auto* workloadSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto workloadVec = LabelledComboBox::getWorkloadOptions();
+    auto workloadVec = MainPanel::getCPUWorkloadOptions();
     wxString workloadOptions[workloadVec.size()];
     std::copy(workloadVec.begin(), workloadVec.end(), workloadOptions);
 
     wxString temperatures[] = { "90", "85", "80", "75", "70" };
     int temperaturesSize = sizeof(temperatures) / sizeof(temperatures[0]);
 
-    workloadBox = new LabelledComboBox(this, wxID_ANY, 150, workloadOptions,
+    workloadBox = new wxLabelledComboBox(this, 150, workloadOptions,
             workloadVec.size(), "Workload profile: ");
-    temperatureBox = new LabelledComboBox(this, wxID_ANY, 75, temperatures,
+    temperatureBox = new wxLabelledComboBox(this, 75, temperatures,
             temperaturesSize, "Abort (C): ");
 
     workloadSizer->Add(workloadBox, 0, wxEXPAND);
@@ -61,6 +60,7 @@ void MainPanel::SetUp() {
 
     /// Set up character set
     auto* charSetContainer = new wxStaticBox(this, wxID_ANY, "Character Set");
+
     auto* charSizer = new wxGridSizer(3, 2, 0, 0);
 
     capitalLetters = new wxCheckBox(charSetContainer, wxID_ANY, "A-Z");
@@ -74,7 +74,14 @@ void MainPanel::SetUp() {
     charSizer->Add(symbols, 0);
     charSizer->AddStretchSpacer();
 
-    charSetContainer->SetSizerAndFit(charSizer);
+    auto *charSetContainerSizer = new wxBoxSizer(wxVERTICAL);
+    charSetContainerSizer->Add(charSizer, 0);
+
+    // Set up password length
+    passwordLengthCtrl = new wxLabelledTxtCtrl(charSetContainer, 50, wxFILTER_NUMERIC, "Password length: ");
+
+    charSetContainerSizer->Add(passwordLengthCtrl, 0);
+    charSetContainer->SetSizer(charSetContainerSizer);
     horizSizer->Add(charSetContainer, 0, wxEXPAND | wxLEFT, 10);
 
     topSizer->AddSpacer(20);
@@ -90,34 +97,14 @@ void MainPanel::SetUp() {
     Layout();
 }
 
-LabelledComboBox::LabelledComboBox(wxWindow *parent, wxWindowID ID, int width, const wxString *contents, int contentCount,
-        const wxString& lbl)
-: wxPanel(parent)
-{
-    szr = new wxBoxSizer(wxHORIZONTAL);
-    SetSizer(szr);
-
-    this->lbl = new wxStaticText(this, ID, lbl);
-    szr->Add(this->lbl, 0, wxEXPAND);
-
-    wxSize customSize{width, wxDefaultSize.y};
-    this->box = new wxComboBox(this, ID, *contents, wxDefaultPosition, customSize,
-            contentCount, contents, wxCB_DROPDOWN);
-    szr->Add(this->box, 0, wxEXPAND);
-}
-
-std::vector<wxString> LabelledComboBox::getWorkloadOptions() {
-    //FIXME: This will look ugly when getMaximumThreads returns 0 or < 4
-    unsigned int maxThreads = cpuHardware::getMaximumThreads() - 1;
-    auto heavyThreads = static_cast<unsigned int>(maxThreads * 0.75);
-    auto mediumThreads = static_cast<unsigned int>(maxThreads * 0.5);
-    auto lightThreads = static_cast<unsigned int>(maxThreads * 0.25);
-
+auto MainPanel::getCPUWorkloadOptions() -> std::vector<wxString> {
+    std::vector<unsigned int> values = getThreadCounts();
     std::vector<wxString> options;
-    options.emplace_back("Unresponsive (" + std::to_string(maxThreads) + ") ");
-    options.emplace_back("Heavy (" + std::to_string(heavyThreads) + ") ");
-    options.emplace_back("Moderate (" + std::to_string(mediumThreads) + ") ");
-    options.emplace_back("Light (" + std::to_string(lightThreads) + ") ");
+
+    std::vector<wxString> text = { "Unresponsive", "Heavy", "Moderate", "Light" };
+    for (int i = 0; i < values.size(); ++i) {
+        options.emplace_back(text[i] + " (" + std::to_string(values[i]) + ")");
+    }
 
     return options;
 }
@@ -127,7 +114,36 @@ BEGIN_EVENT_TABLE(MainPanel, wxPanel)
 END_EVENT_TABLE()
 
 void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
-    characterSet cs(true, false, true, false); //TODO: Get these values from UI
-    Scheduler sched(cs, cpuHardware::getMaximumThreads(), 5, model.getHashes());
-    sched.dispatchWorkers();
+
+    CharacterSet::buildCharacterSet(lowercaseLetters->GetValue(), capitalLetters->GetValue(),
+            numeric->GetValue(), symbols->GetValue()); //TODO: Get these values from UI
+    NumberSystem::setBase(CharacterSet::getChars().size());
+    int val = wxAtoi(passwordLengthCtrl->str());
+    unsigned int threadCount = MainPanel::getThreadCounts()[workloadBox->getIndex()];
+    if (val < 1 || val > UINT_MAX) {
+        wxLogError("Password length must fit in an unsigned integer.");
+        return;
+    }
+    scheduler = nullptr;
+    scheduler = std::make_unique<Scheduler>(threadCount, static_cast<unsigned int>(val), std::move(model.getHashes())); // Deletes old value and assigns to new pointer
+    scheduler->dispatchWorkers();
+}
+
+auto MainPanel::getThreadCounts() -> std::vector<unsigned int> {
+    unsigned int maxThreads = CpuHardware::getMaximumThreads() - 1;
+    auto heavyThreads = static_cast<unsigned int>(maxThreads * 0.75);
+    auto mediumThreads = static_cast<unsigned int>(maxThreads * 0.5);
+    auto lightThreads = static_cast<unsigned int>(maxThreads * 0.25);
+
+    std::vector<unsigned int> values;
+
+    values.push_back(maxThreads);
+    if (maxThreads >= 4)
+        values.push_back(heavyThreads);
+    if (maxThreads >= 2)
+        values.emplace_back(mediumThreads);
+    if (maxThreads >= 4)
+        values.emplace_back(lightThreads);
+
+    return values;
 }

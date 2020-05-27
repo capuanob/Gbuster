@@ -28,7 +28,7 @@ void GFrame::OnLoad(wxCommandEvent &event) {
     HashModel model;
     // Store hashes in program's model
     for (auto& str = hashList.GetFirstLine(); !hashList.Eof(); str = hashList.GetNextLine())
-        model.add_hash(std::string(str));
+        model.addHash(std::string(str));
 
     hashList.Close();
     loadMainUI(model);
@@ -72,7 +72,7 @@ void GFrame::loadMainUI(HashModel& model) {
 }
 
 void GFrame::OnTestMD5(wxCommandEvent &event) {
-    auto *debugFrame = new DebugFrame(this, "Admin Panel",
-            wxDefaultPosition, wxSize(450, 600));
-    debugFrame->Show(true);
+//    auto *debugFrame = new DebugFrame(this, "Admin Panel",
+//            wxDefaultPosition, wxSize(450, 600));
+//    debugFrame->Show(true);
 }

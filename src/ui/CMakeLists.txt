@@ -11,7 +11,7 @@ set(UI_HEADERS
         hashTestPanel.h
         IDs.h
         mainPanel.h
-)
+        wxLabelledWindow.cpp wxLabelledWindow.h)
 
 # Find wxWidgets
 find_package(wxWidgets COMPONENTS core base REQUIRED)

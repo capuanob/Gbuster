@@ -16,7 +16,7 @@ public:
 
 private:
     wxBoxSizer* topSizer; // Used for laying out the frame
-    hashTestPanel* md5Panel; // Panel for testing md5
+    // hashTestPanel* md5Panel; // Panel for testing md5
 };
 
 #endif //GBUSTER_DEBUGFRAME_H

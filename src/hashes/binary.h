@@ -16,7 +16,7 @@ static const unsigned int BYTES_IN_WORD = 4;
 using byte = uint8_t;
 
 enum class Endian {
-    SYSTEM, BIG, LITTLE
+    System, Big, Little
 };
 
 namespace bin {
@@ -36,7 +36,7 @@ namespace bin {
     // ALL HELPER FUNCTIONS ASSUME LITTLE-ENDIAN ORDERING
     Word itow(uint32_t val); // Converts a 32-bit integer value to a little-endian Word
     uint32_t btoi(const byte* bytes); // Converts a little-endian array of bytes (4) to a 32-bit big-endian int
-    std::vector<Word> i64tw(uint64_t src); // Splits a 64-bit integer into a host-endian vector of 8 bytes.
+    std::vector<Word> i64Tw(uint64_t src); // Splits a 64-bit integer into a host-endian vector of 8 bytes.
 
     bool systemIsLittleEndian(); // Determines whether or not the host CPU is big or little endian.
 
@@ -47,8 +47,8 @@ namespace bin {
         [[nodiscard]] constexpr inline bool isFull() const { return ip >= BYTES_IN_WORD; } // True if the word cannot store any additional bytes
         void add(byte b); // Inserts a byte in little-endian order.
 
-        Word(const byte* lBytes, int byteCount, Endian type = Endian::SYSTEM); // Array-based constructor
-        Word(std::initializer_list<byte> lBytes, Endian type = Endian::SYSTEM); // Initializer list constructor
+        Word(const byte* lBytes, int byteCount, Endian type = Endian::System); // Array-based constructor
+        Word(std::initializer_list<byte> lBytes, Endian type = Endian::System); // Initializer list constructor
         Word() = default; // Default constructor
 
         Word operator+(const Word& other) const;

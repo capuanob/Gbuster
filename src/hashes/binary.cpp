@@ -26,7 +26,7 @@ bin::Word bin::itow(uint32_t val) {
     return Word(bytes, 4); // Let constructor handle host-endianness.
 }
 
-std::vector<bin::Word> bin::i64tw(uint64_t src) {
+std::vector<bin::Word> bin::i64Tw(uint64_t src) {
     std::vector<byte> bytes;
     std::vector<Word> words;
 
@@ -105,7 +105,7 @@ uint32_t bin::Word::value() const {
 
 
 void bin::Word::ensureLittleEndian(Endian type) {
-    bool needsConversion = (type == Endian::SYSTEM && !systemIsLittleEndian()) || (type == Endian::BIG);
+    bool needsConversion = (type == Endian::System && !systemIsLittleEndian()) || (type == Endian::Big);
 
     if (needsConversion)
         std::reverse(bytes, bytes + BYTES_IN_WORD);

@@ -7,35 +7,16 @@
 
 #ifndef PANEL_INCLUDES
 #define PANEL_INCLUDES
-#include <wx/panel.h> // Panel inheritance
-#include <wx/sizer.h>
+#include "wxLabelledWindow.h"
 #include "IDs.h"
 #include "hashModel.h" // Application's model
 #include "scheduler.h"
+#include <memory>
 #endif // PANEL_INCLUDES
 
-
-#include <wx/combobox.h>
-#include <wx/stattext.h> // labels
 #include <wx/checkbox.h>
 #include "CpuHardware.h" // Getting thread count
 #include "../threading/cpu/scheduler.h" // Work allotment
-
-class LabelledComboBox : public wxPanel {
-public:
-    LabelledComboBox(wxWindow* parent, wxWindowID ID, int width, const wxString* contents, int contentCount,
-                     const wxString& lbl = wxEmptyString);
-
-    /**
-     *
-     * @return An array of workload options for the combo box to display
-     */
-    static std::vector<wxString> getWorkloadOptions();
-private:
-    wxBoxSizer* szr = nullptr;
-    wxStaticText* lbl = nullptr;
-    wxComboBox* box = nullptr;
-};
 
 class MainPanel : public wxPanel {
 public:
@@ -44,19 +25,24 @@ public:
 
     // Event handling
     void OnCrackBtnPressed(wxCommandEvent& event); // Handles set-up and execution of a brute-force attack
+    static auto getThreadCounts() -> std::vector<unsigned int>;
 private:
-
     void SetUp(); // Sets up the controls
 
+    static auto getCPUWorkloadOptions() -> std::vector<wxString>;
+
     HashModel model;
+    std::unique_ptr<Scheduler> scheduler;
     wxFont labelFont{15, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
     wxFont btnFont{20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL};
+
     // Combo boxes
     wxStaticText* countLabel = nullptr;
-    LabelledComboBox* hashBox = nullptr;
-    LabelledComboBox* deviceBox = nullptr;
-    LabelledComboBox* workloadBox = nullptr;
-    LabelledComboBox* temperatureBox = nullptr;
+    wxLabelledComboBox* hashBox = nullptr;
+    wxLabelledComboBox* deviceBox = nullptr;
+    wxLabelledComboBox* workloadBox = nullptr;
+    wxLabelledComboBox* temperatureBox = nullptr;
+    wxLabelledTxtCtrl* passwordLengthCtrl;
 
     // Check boxes
     wxCheckBox* capitalLetters = nullptr;
