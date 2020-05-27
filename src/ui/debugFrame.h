@@ -5,8 +5,9 @@
 #ifndef GBUSTER_DEBUGFRAME_H
 #define GBUSTER_DEBUGFRAME_H
 
-#include <wx/frame.h>
+#include <wx/frame.h> // Frame inheritance
 #include "hashTestPanel.h"
+#include "md5.h"
 
 class DebugFrame: public wxFrame {
 public:
@@ -14,7 +15,8 @@ public:
     ~DebugFrame() override = default;
 
 private:
-    hashTestPanel* md5Panel;
+    wxBoxSizer* topSizer; // Used for laying out the frame
+    // hashTestPanel* md5Panel; // Panel for testing md5
 };
 
 #endif //GBUSTER_DEBUGFRAME_H

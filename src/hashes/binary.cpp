@@ -4,6 +4,11 @@
 
 #include "binary.h"
 
+uint8_t bin::U8 = 8;
+uint8_t bin::U16 = 16;
+uint8_t bin::U24 = 24;
+uint8_t bin::U32 = 32;
+
 uint32_t bin::btoi(const byte* bytes) {
     return static_cast<uint32_t>(bytes[0] | (bytes[1] << U8) | (bytes[2] << U16) | (bytes[3] << U24));
 }
@@ -21,7 +26,7 @@ bin::Word bin::itow(uint32_t val) {
     return Word(bytes, 4); // Let constructor handle host-endianness.
 }
 
-std::vector<bin::Word> bin::i64tw(uint64_t src) {
+std::vector<bin::Word> bin::i64Tw(uint64_t src) {
     std::vector<byte> bytes;
     std::vector<Word> words;
 
@@ -47,15 +52,15 @@ void bin::Word::append(byte b) {
 
 bin::Word::Word(const byte* pBytes, int byteCount, Endian type) {
     unsigned int insertionIdx = BYTES_IN_WORD - byteCount;
-    std::copy(pBytes, pBytes + byteCount, bytes);
-    ensureLittleEndian(type, byteCount);
+    std::copy(pBytes, pBytes + byteCount, bytes + insertionIdx);
+    ensureLittleEndian(type);
 }
 
 
 bin::Word::Word(std::initializer_list<byte> lBytes, Endian type) {
     unsigned int insertionIdx = BYTES_IN_WORD - lBytes.size();
-    std::copy(lBytes.begin(), lBytes.end(), bytes);
-    ensureLittleEndian(type, lBytes.size());
+    std::copy(lBytes.begin(), lBytes.end(), bytes + insertionIdx);
+    ensureLittleEndian(type);
 }
 
 bin::Word bin::Word::operator|(const bin::Word &other) const {
@@ -99,11 +104,11 @@ uint32_t bin::Word::value() const {
 }
 
 
-void bin::Word::ensureLittleEndian(Endian type, unsigned int byteCount) {
-    bool needsConversion = (type == Endian::SYSTEM && !systemIsLittleEndian()) || (type == Endian::BIG);
+void bin::Word::ensureLittleEndian(Endian type) {
+    bool needsConversion = (type == Endian::System && !systemIsLittleEndian()) || (type == Endian::Big);
 
     if (needsConversion)
-        std::reverse(bytes, bytes + byteCount);
+        std::reverse(bytes, bytes + BYTES_IN_WORD);
 }
 
 

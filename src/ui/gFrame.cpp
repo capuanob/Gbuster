@@ -13,17 +13,36 @@ void GFrame::OnExit(wxCommandEvent &event) {
 }
 
 void GFrame::OnLoad(wxCommandEvent &event) {
-    md5::getDigest("5r09r030450t0gd00sqallf0v0s0a0505slxlDKFKFLSL%#)@)!)!)@8");
+    wxFileDialog openFileDialog(this, "Choose a hash list",
+            "", "", "Text Files (*.txt)|*.txt", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+
+    if (openFileDialog.ShowModal() != wxID_OK) return;
+
+    // Open file
+    wxTextFile hashList(openFileDialog.GetPath());
+    if (!hashList.Open()) {
+        wxLogError("Cannot open file '%s'.", openFileDialog.GetFilename());
+        return;
+    }
+
+    HashModel model;
+    // Store hashes in program's model
+    for (auto& str = hashList.GetFirstLine(); !hashList.Eof(); str = hashList.GetNextLine())
+        model.addHash(std::string(str));
+
+    hashList.Close();
+    loadMainUI(model);
 }
 
 
 GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     : wxFrame(nullptr, wxID_ANY, title, pos, size)
 {
+    topSizer = new wxBoxSizer(wxVERTICAL);
 
     auto *menuFile = new wxMenu;
-    menuFile->Append(ID_Load, "&Load from file...\tCtrl-L",
-            "Load a password hash dump from a file.");
+    menuFile->Append(ID_LOAD, "&Load from file...\tCtrl-L",
+                     "Load a password hash dump from a file.");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 
@@ -38,18 +57,22 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
     menuBar->Append( menuHelp, "&Help" );
     menuBar->Append( menuDebug, "&Debug" );
 
+    SetSizer(topSizer);
     SetMenuBar(menuBar);
     CreateStatusBar();
     SetStatusText( "Welcome to Gbuster!" );
 
 }
 
-void GFrame::loadMainUI() {
+void GFrame::loadMainUI(HashModel& model) {
+    auto* mainPanel = new MainPanel(this, std::move(model));
+    topSizer->Add(mainPanel, 0, wxEXPAND);
 
+    Layout();
 }
 
 void GFrame::OnTestMD5(wxCommandEvent &event) {
-    auto *debugFrame = new DebugFrame(this, "Admin Panel",
-            wxPoint(50, 50), wxSize(450, 600));
-    debugFrame->Show(true);
+//    auto *debugFrame = new DebugFrame(this, "Admin Panel",
+//            wxDefaultPosition, wxSize(450, 600));
+//    debugFrame->Show(true);
 }

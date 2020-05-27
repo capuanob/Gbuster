@@ -7,10 +7,12 @@
 
 #endif //GBUSTER_IDS_H
 
-#include <wx/wx.h>
+#include <wx/wx.h> // Needed for wxID_HIGHEST
+
 enum IDs {
-    ID_Load = wxID_HIGHEST + 1,
-    ID_TEST_MD5,
-    ID_HASH,
-    ID_TXTBOX
+    ID_LOAD = wxID_HIGHEST + 1, // gFrame load hash list menu option
+    ID_TEST_MD5, // gFrame debug menu option
+    ID_TEST_HASH, // HashTestPanel button
+    ID_HASH_TEXT_BOX, // HashTestPanel text box
+    ID_CRACK // mainPanel crack button
 };
