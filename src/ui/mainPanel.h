@@ -42,7 +42,7 @@ private:
     wxLabelledComboBox* deviceBox = nullptr;
     wxLabelledComboBox* workloadBox = nullptr;
     wxLabelledComboBox* temperatureBox = nullptr;
-    wxLabelledTxtCtrl* passwordLengthCtrl;
+    wxLabelledTxtCtrl* passwordLengthCtrl = nullptr;
 
     // Check boxes
     wxCheckBox* capitalLetters = nullptr;

@@ -21,7 +21,7 @@ public:
     static auto toBase(ull value, std::array<unsigned char, Constants::MAX_PASSWORD_LEN> &result) noexcept -> unsigned int;
 
     inline constexpr static void setBase(int b) noexcept { base = b; }
-    inline static int getBase() noexcept { return base; }
+    inline static auto getBase() noexcept -> int { return base; }
 private:
     inline static int base{};
 

@@ -25,7 +25,8 @@ void CharacterSet::buildCharacterSet(bool lo, bool up, bool num, bool symbol) no
         insertionIdx += Constants::SYMBOL_COUNT;
     }
 
-    for (; insertionIdx != Constants::MAX_CHARS; ++insertionIdx)
+    for (; insertionIdx != Constants::MAX_CHARS; ++insertionIdx) {
         combinedSet.at(insertionIdx) = '\0';
+    }
 }
 

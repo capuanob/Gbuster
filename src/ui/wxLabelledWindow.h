@@ -25,7 +25,7 @@ class wxLabelledComboBox : public wxLabelledWindow {
 public:
     wxLabelledComboBox(wxWindow* parent, int width, const wxString* contents, int contentCount,
                        const wxString& lbl = wxEmptyString);
-    unsigned int getIndex() const { return box->GetSelection(); }
+    [[nodiscard]] auto getIndex() const -> unsigned int { return box->GetSelection(); }
 private:
     wxComboBox* box = nullptr;
 };

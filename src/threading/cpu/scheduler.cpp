@@ -6,8 +6,7 @@
 
 #include <utility>
 
-Scheduler::Scheduler(int workerCount,
-                     unsigned int maxLen, std::unordered_set<std::string>&& hashes)
+Scheduler::Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes)
         : hash_list(hashes), maxLen(maxLen){
     // Build distribution
 
@@ -25,7 +24,7 @@ void Scheduler::dispatchWorkers() {
     thread_pool.reserve(workDistribution.size());
 
     // Set up hash thread constants
-    HashThread::SetConstants(maxLen, hash_list);
+    HashThread::SetSet(std::move(hash_list));
     // Dispatch the thread
     thread_pool.clear();
     for (const auto& distr : workDistribution) {

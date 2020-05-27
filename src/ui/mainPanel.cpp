@@ -115,17 +115,22 @@ END_EVENT_TABLE()
 
 void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
 
+    // Set up character set using radio boxes
     CharacterSet::buildCharacterSet(lowercaseLetters->GetValue(), capitalLetters->GetValue(),
-            numeric->GetValue(), symbols->GetValue()); //TODO: Get these values from UI
+            numeric->GetValue(), symbols->GetValue());
     NumberSystem::setBase(CharacterSet::getChars().size());
-    int val = wxAtoi(passwordLengthCtrl->str());
+
+    // Clean password maximum length (input)
+    int maxLen = wxAtoi(passwordLengthCtrl->str());
     unsigned int threadCount = MainPanel::getThreadCounts()[workloadBox->getIndex()];
-    if (val < 1 || val > UINT_MAX) {
-        wxLogError("Password length must fit in an unsigned integer.");
+    if (maxLen < 1 || maxLen > Constants::MAX_PASSWORD_LEN) {
+        wxString lengthError = "Password length must be between 0 and " + std::to_string(Constants::MAX_PASSWORD_LEN);
+        wxLogError(lengthError);
         return;
     }
-    scheduler = nullptr;
-    scheduler = std::make_unique<Scheduler>(threadCount, static_cast<unsigned int>(val), std::move(model.getHashes())); // Deletes old value and assigns to new pointer
+
+    // Create scheduler and dispatch threads
+    scheduler = std::make_unique<Scheduler>(threadCount, static_cast<unsigned int>(maxLen), std::move(model.getHashes())); // Deletes old value and assigns to new pointer
     scheduler->dispatchWorkers();
 }
 

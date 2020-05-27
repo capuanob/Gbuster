@@ -13,7 +13,7 @@ public:
     /**
      * @return The number of concurrent threads supported by the implementation
      */
-    inline static unsigned int getMaximumThreads() {  return std::thread::hardware_concurrency(); }
+    inline static auto getMaximumThreads() -> unsigned int {  return std::thread::hardware_concurrency(); }
 };
 
 

@@ -3,7 +3,7 @@
 //
 #include "numberSystem.h"
 
-unsigned int NumberSystem::toBase(ull value, std::array<unsigned char, Constants::MAX_PASSWORD_LEN>& result) noexcept {
+auto NumberSystem::toBase(ull value, std::array<unsigned char, Constants::MAX_PASSWORD_LEN>& result) noexcept -> unsigned int {
     unsigned int i = 0;
     const auto& chars = CharacterSet::getChars();
     const auto& front = chars[1];

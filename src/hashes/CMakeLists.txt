@@ -1,11 +1,8 @@
 set(HASH_SOURCES
-        binary.cpp
         md5.cpp
-        hashModel.cpp
-)
+        )
 
 set(HASH_HEADERS
-        binary.h
         md5.h
         hashModel.h)
 

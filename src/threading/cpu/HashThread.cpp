@@ -4,8 +4,9 @@
 
 #include "HashThread.h"
 #include <iostream>
+#include <utility>
 
-wxThread::ExitCode HashThread::Entry() {
+auto HashThread::Entry() -> wxThread::ExitCode {
     auto curr = start; // Copy by value
     std::array<byte, md5::WORDS_IN_BLOCK> digest{};
     std::array<byte, Constants::MAX_PASSWORD_LEN> clearText{};
@@ -24,15 +25,9 @@ wxThread::ExitCode HashThread::Entry() {
         ++curr;
     }
 
-    mutex->Lock();
-    std::cout << "Finished" << std::endl;
-    for (const auto& pair : resolvedHashes)
-        std::cout << pair.first << " --> " << pair.second << std::endl;
-    mutex->Unlock();
-    return 0;
+    return nullptr;
 }
 
-void HashThread::SetConstants(int mLen, stringSet set) {
-    HashThread::maxLen = mLen;
-    HashThread::hashList = set;
+void HashThread::SetSet(stringSet &&set) {
+    HashThread::hashList = std::move(set);
 }

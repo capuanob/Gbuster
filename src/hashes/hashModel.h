@@ -21,11 +21,31 @@ public:
      * @param hash Hash to be added
      */
     inline void addHash(const std::string& hash) { hashes.insert(hash); }
-    inline unsigned long size() const noexcept { return hashes.size(); }
+    inline auto size() const noexcept -> unsigned long { return hashes.size(); }
 
-    inline std::unordered_set<std::string>& getHashes() noexcept { return hashes; }
-    HashModel() = default;
-    ~HashModel() = default;
+    inline auto getHashes() noexcept -> std::unordered_set<std::string>& { return hashes; }
+
+    // Constructors and move operators
+    HashModel() = default; // constructor
+    ~HashModel() = default; // destructor
+    HashModel(const HashModel& other) { // copy constructor
+        this->hashes = other.hashes;
+    }
+    auto operator=(const HashModel& other) -> HashModel& { // copy assignment constructor
+        if (this != &other) {
+            this->hashes = other.hashes;
+        }
+        return *this;
+    }
+    HashModel(HashModel&& other)  noexcept { // Move constructor
+        this->hashes = other.hashes;
+    }
+    auto operator=(HashModel&& other)  noexcept -> HashModel& { // Move assignment constructor
+        if (this != &other) {
+            this->hashes = other.hashes;
+        }
+        return *this;
+    }
 private:
     std::unordered_set<std::string> hashes; // Stores all hashes to be cracked.
 };

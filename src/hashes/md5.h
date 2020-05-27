@@ -8,16 +8,17 @@
 #ifndef HASHIMPL_MD5_H
 #define HASHIMPL_MD5_H
 
-#include "binary.h"
 #include <array>
 #include <memory>
 #include <cstring>
 #include <vector>
 #include <string>
-using namespace bin;
+
+using byte = uint8_t ;
 
 namespace md5 {
 /// CONSTANTS ///
+    constexpr int BYTES_IN_WORD = 4;
     constexpr int WORDS_IN_BLOCK = 16;
     constexpr int DOUBLE_WORD = 64;
     constexpr int DIGEST_LEN = 32;
@@ -53,38 +54,38 @@ namespace md5 {
     };
 
 /// AUXILIARY FUNCTIONS ///
-    inline constexpr uint32_t lrotate(uint32_t value, byte amt) {
+    inline constexpr auto lrotate(uint32_t value, byte amt) -> uint32_t {
         return (value << amt) | (value >> static_cast<byte>(32u - amt));
     }
 
-    inline constexpr uint32_t F(uint32_t x, uint32_t y, uint32_t z) {
+    inline constexpr auto F(uint32_t x, uint32_t y, uint32_t z) -> uint32_t {
         return (x & y) | (~x & z);
     }
 
-    inline constexpr uint32_t G(uint32_t x, uint32_t y, uint32_t z) {
+    inline constexpr auto G(uint32_t x, uint32_t y, uint32_t z) -> uint32_t {
         return (x & z) | (y & ~z);
     }
 
-    inline constexpr uint32_t H(uint32_t x, uint32_t y, uint32_t z) {
+    inline constexpr auto H(uint32_t x, uint32_t y, uint32_t z) -> uint32_t {
         return x ^ y ^ z;
     }
 
-    inline constexpr uint32_t I(uint32_t x, uint32_t y, uint32_t z) {
+    inline constexpr auto I(uint32_t x, uint32_t y, uint32_t z) -> uint32_t {
         return y ^ (x | ~z);
     }
 
-    inline constexpr uint32_t
-    FF(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t blk, byte shiftAmt, uint32_t tableVal) {
+    inline constexpr auto
+    FF(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t blk, byte shiftAmt, uint32_t tableVal) -> uint32_t {
         return b + lrotate(a + F(b, c, d) + blk + tableVal, shiftAmt);
     }
 
-    inline constexpr uint32_t
-    GG(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t blk, byte shiftAmt, uint32_t tableVal) {
+    inline constexpr auto
+    GG(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t blk, byte shiftAmt, uint32_t tableVal) -> uint32_t {
         return b + lrotate(a + G(b, c, d) + blk + tableVal, shiftAmt);
     }
 
-    inline constexpr uint32_t
-    HH(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t blk, byte shiftAmt, uint32_t tableVal) {
+    inline constexpr auto
+    HH(uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t blk, byte shiftAmt, uint32_t tableVal) -> uint32_t {
         return b + lrotate(a + H(b, c, d) + blk + tableVal, shiftAmt);
     }
 
@@ -142,20 +143,21 @@ namespace md5 {
         unsigned int partialLength = DOUBLE_WORD - index;
 
         // Transform as many times as possible
-        unsigned int i;
+        unsigned int i = 0;
         if (inputLen >= partialLength) {
-            std::memcpy(&context.buffer[index], &input, partialLength);
+            std::memcpy(&context.buffer.at(index), &input, partialLength);
             md5::transform(context.state, context.buffer);
 
             for (i = partialLength; i + 63 < inputLen; i += 64) {
                 md5::transform(context.state, reinterpret_cast<std::array<byte, DOUBLE_WORD>&>(input[i]));
             }
             index = 0;
-        } else
+        } else {
             i = 0;
+        }
 
         // Buffer remaining input
-        std::memcpy(&context.buffer[index], &input[i], inputLen-i);
+        std::memcpy(&context.buffer.at(index), &input[i], inputLen-i);
     }
 
     /**
@@ -167,12 +169,13 @@ namespace md5 {
     template <size_t out_size, size_t in_size>
     void encode(std::array<byte, out_size>& output, std::array<uint32_t, in_size>& input) {
         static_assert(out_size % 4 == 0); // Pre-req to usage of this function
-        unsigned int i, j;
-        for (i = 0, j = 0; j < out_size; i++, j+= 4) {
-            output[j] = static_cast<byte>(input[i] & 0xFFu);
-            output[j+1] = static_cast<byte>((input[i] >> 8u) & 0xFFu);
-            output[j+2] = static_cast<byte>((input[i] >> 16u) & 0xFFu);
-            output[j+3] = static_cast<byte>((input[i] >> 24u) & 0xFFu);
+        unsigned int i = 0;
+        unsigned int j = 0;
+        for (; j < out_size; i++, j+= 4) {
+            output[j] = static_cast<byte>(input[i] & 0xFFU);
+            output[j+1] = static_cast<byte>((input[i] >> 8U) & 0xFFU);
+            output[j+2] = static_cast<byte>((input[i] >> 16U) & 0xFFU);
+            output[j+3] = static_cast<byte>((input[i] >> 24U) & 0xFFU);
         }
     }
 
@@ -185,10 +188,11 @@ namespace md5 {
     template <size_t out_size, size_t in_size>
     void decode(std::array<uint32_t, out_size>& output, std::array<byte, in_size>& input) {
         static_assert(in_size % 4 == 0); // Pre-req to usage of this function
-        unsigned int i, j;
-        for (i = 0, j = 0; j < in_size; i++, j += 4) {
-            output[i] = static_cast<uint32_t>(input[j]) | static_cast<uint32_t>(input[j+1] << 8u) |
-                        static_cast<uint32_t>(input[j+2] << 16u) | static_cast<uint32_t>(input[j+3] << 24u);
+        unsigned int i = 0;
+        unsigned int j = 0;
+        for (; j < in_size; i++, j += 4) {
+            output[i] = static_cast<uint32_t>(input[j]) | static_cast<uint32_t>(input[j+1] << 8U) |
+                        static_cast<uint32_t>(input[j+2] << 16U) | static_cast<uint32_t>(input[j+3] << 24U);
         }
     }
 
@@ -212,8 +216,9 @@ namespace md5 {
         std::string temp;
         temp.resize(DIGEST_LEN);
 
-        unsigned int i, j;
-        for (i = 0, j = 0; i < DIGEST_LEN; i += 2, j++) {
+        unsigned int i = 0;
+        unsigned int j = 0;
+        for (; i < DIGEST_LEN; i += 2, j++) {
             sprintf(&temp[i], "%02x", digest[j]);
         }
 

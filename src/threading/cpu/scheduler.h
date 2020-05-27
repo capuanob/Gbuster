@@ -19,8 +19,7 @@ public:
      * @param maxLen Maximum length that the cleartext can be
      * @param hashes Collection of hashes to break
      */
-    Scheduler(int workerCount,
-              unsigned int maxLen, std::unordered_set<std::string>&& hashes);
+    Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes);
     /**
      * Thread driver functions. Creates and starts threads.
      */
@@ -30,7 +29,7 @@ private:
     std::vector<std::unique_ptr<HashThread>> thread_pool;
     std::unordered_set<std::string> hash_list;
     std::vector<workPerThread> workDistribution;
-    const unsigned int maxLen;
+    const int maxLen;
 };
 
 
