@@ -14,5 +14,6 @@ enum IDs {
     ID_TEST_MD5, // gFrame debug menu option
     ID_TEST_HASH, // HashTestPanel button
     ID_HASH_TEXT_BOX, // HashTestPanel text box
-    ID_CRACK // mainPanel crack button
+    ID_CRACK, // mainPanel crack button
+    ID_TIMER, // mainPanel timer for progress bar
 };

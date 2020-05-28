@@ -1,9 +1,9 @@
 //
-// Created by bailey on 5/23/20.
+// Created by bailey on 5/28/20.
 //
 
-#ifndef GBUSTER_NUMBERSYSTEM_H
-#define GBUSTER_NUMBERSYSTEM_H
+#ifndef PRACTICECPP20_NUMBERSYSTEM_H
+#define PRACTICECPP20_NUMBERSYSTEM_H
 
 #include <string>
 #include <array>
@@ -28,4 +28,4 @@ private:
 };
 
 
-#endif //GBUSTER_NUMBERSYSTEM_H
+#endif //PRACTICECPP20_NUMBERSYSTEM_H

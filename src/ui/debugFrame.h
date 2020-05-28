@@ -12,7 +12,7 @@
 class DebugFrame: public wxFrame {
 public:
     DebugFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size);
-    ~DebugFrame() override = default;
+
 
 private:
     wxBoxSizer* topSizer; // Used for laying out the frame

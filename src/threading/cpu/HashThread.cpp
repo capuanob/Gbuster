@@ -11,7 +11,7 @@ auto HashThread::Entry() -> wxThread::ExitCode {
     std::array<byte, md5::WORDS_IN_BLOCK> digest{};
     std::array<byte, Constants::MAX_PASSWORD_LEN> clearText{};
 
-    while (curr != end) {
+    while (curr != end + 1) {
         unsigned int actualLen = NumberSystem::toBase(curr, clearText);
         md5::getDigest(clearText, digest, actualLen);
         auto digestStr = md5::digestStr(digest);
@@ -23,11 +23,21 @@ auto HashThread::Entry() -> wxThread::ExitCode {
             mutex->Unlock(); // Exit CS
         }
         ++curr;
+        ++count;
     }
 
-    return nullptr;
+    return 0;
 }
 
-void HashThread::SetSet(stringSet &&set) {
+void HashThread::initSet(stringSet &&set) {
     HashThread::hashList = std::move(set);
+}
+
+HashThread::~HashThread() {
+    // Notify scheduler that work is completed
+    wxCommandEvent deletionEvent(wxEVT_THREAD, THREAD_DELETE_ID);
+    deletionEvent.SetInt(identifier); // Set identifier
+    mutex->Lock();
+    parent->GetEventHandler()->AddPendingEvent(deletionEvent);
+    mutex->Unlock();
 }

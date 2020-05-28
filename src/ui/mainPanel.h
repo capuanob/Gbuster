@@ -11,26 +11,29 @@
 #include "IDs.h"
 #include "hashModel.h" // Application's model
 #include "scheduler.h"
-#include <memory>
+#include "wxHelper.h"
+
 #endif // PANEL_INCLUDES
-
+#include "wxProgressPanel.h"
 #include <wx/checkbox.h>
+#include <wx/timer.h>
 #include "CpuHardware.h" // Getting thread count
-#include "../threading/cpu/scheduler.h" // Work allotment
 
+using namespace std::chrono;
 class MainPanel : public wxPanel {
 public:
-    explicit MainPanel(wxWindow* parent, HashModel&& model);
-    ~MainPanel() override = default;
+    explicit MainPanel(wxWindow* parent, HashModel& model);
+    ~MainPanel() override;
 
     // Event handling
     void OnCrackBtnPressed(wxCommandEvent& event); // Handles set-up and execution of a brute-force attack
+    void OnPollThreads(wxTimerEvent& event); // Handles updating of progress bars to show thread progress
+    void OnThreadDeletion(wxCommandEvent& event); // Handles deletion of threads via thread notification
+
     static auto getThreadCounts() -> std::vector<unsigned int>;
 private:
     void SetUp(); // Sets up the controls
-
     static auto getCPUWorkloadOptions() -> std::vector<wxString>;
-
     HashModel model;
     std::unique_ptr<Scheduler> scheduler;
     wxFont labelFont{15, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
@@ -43,7 +46,6 @@ private:
     wxLabelledComboBox* workloadBox = nullptr;
     wxLabelledComboBox* temperatureBox = nullptr;
     wxLabelledTxtCtrl* passwordLengthCtrl = nullptr;
-
     // Check boxes
     wxCheckBox* capitalLetters = nullptr;
     wxCheckBox* lowercaseLetters = nullptr;
@@ -51,9 +53,12 @@ private:
     wxCheckBox* symbols = nullptr;
 
     wxButton* crackButton = nullptr;
-
+    wxTimer* progressTimer = nullptr;
+    wxProgressPanel* progressPanel = nullptr;
     wxBoxSizer* topSizer = new wxBoxSizer(wxVERTICAL);
 
+    time_point<high_resolution_clock> start;
+    time_point<high_resolution_clock> end;
     wxDECLARE_EVENT_TABLE();
 };
 

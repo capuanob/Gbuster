@@ -6,17 +6,18 @@
 
 #include <utility>
 
-Scheduler::Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes)
-        : hash_list(hashes), maxLen(maxLen){
+Scheduler::Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes, wxPanel* parent)
+        : hash_list(hashes), maxLen(maxLen), parent(parent), deadThreads{} {
     // Build distribution
 
     // Establish cleartext range
     ull lastString = std::pow(NumberSystem::getBase(), maxLen);
     ull singleWorkLoad = static_cast<ull>(lastString / workerCount);
 
-    for (ull curr = 0; curr < lastString; curr += singleWorkLoad + 1) {
+    for (ull curr = 1; curr < lastString; curr += singleWorkLoad + 1) {
         workDistribution.emplace_back(curr, ((curr + singleWorkLoad) > lastString) ? lastString : (curr + singleWorkLoad));
     }
+
 }
 
 void Scheduler::dispatchWorkers() {
@@ -24,15 +25,21 @@ void Scheduler::dispatchWorkers() {
     thread_pool.reserve(workDistribution.size());
 
     // Set up hash thread constants
-    HashThread::SetSet(std::move(hash_list));
+    HashThread::initSet(std::move(hash_list));
     // Dispatch the thread
     thread_pool.clear();
+    int i = 0;
     for (const auto& distr : workDistribution) {
-        thread_pool.emplace_back(std::make_unique<HashThread>(std::cref(distr.first), std::cref(distr.second)));
+        thread_pool.emplace_back(new HashThread(i++, std::cref(distr.first), std::cref(distr.second), std::ref(parent)));
     }
 
     for (auto& thread : thread_pool) {
         thread->Run();
     }
+}
 
+void Scheduler::deleteThread(int threadIdx) {
+    assert(threadIdx >= 0 && threadIdx <= thread_pool.size());
+    thread_pool.at(threadIdx) = nullptr;
+    ++deadThreads;
 }

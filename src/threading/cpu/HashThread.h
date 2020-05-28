@@ -5,6 +5,7 @@
 #ifndef GBUSTER_HASHTHREAD_H
 #define GBUSTER_HASHTHREAD_H
 #include <wx/thread.h>
+#include <wx/panel.h>
 #include <unordered_set>
 #include <unordered_map>
 #include "numberSystem.h"
@@ -13,18 +14,28 @@
 using stringSet = std::unordered_set<std::string>;
 using stringMap = std::unordered_map<std::string, std::string>;
 
+constexpr int THREAD_DELETE_ID = 10000000;
 class HashThread : public wxThread {
 public:
     // Constructors
-    HashThread(const ull start, const ull end) :wxThread(wxTHREAD_DETACHED), start(start), end(end) {}
+    HashThread(unsigned int identifier, const ull start, const ull end, wxPanel* parent)
+     :wxThread(wxTHREAD_DETACHED), start(start), end(end), parent(parent), identifier(identifier), count{} {};
 
-    static void SetSet(stringSet &&set);
+    // Destructor
+    ~HashThread() override;
+    static void initSet(stringSet &&set);
+    inline unsigned int getCount() const { return count; }
+    inline static auto getCracked() -> const stringMap& { return resolvedHashes; }
 private:
     inline static wxMutex* mutex = new wxMutex(); // Mutex used by all threads to control access to critical section of resolved hashes.
+    wxPanel* parent;
     const ull start; // First string to hash
     const ull end; // Last string to hash
     inline static stringSet hashList; // List of hashes fed into program
     inline static stringMap resolvedHashes; // List of hashes resolved by all threads
+    unsigned long long count; // Track number of altered
+    unsigned int identifier; // index in scheduler's thread pool, used for communicating with scheduler
+
     // Overrides
     auto Entry() -> ExitCode override; // Entry point of thread, where execution begins
 };

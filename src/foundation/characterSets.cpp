@@ -1,4 +1,9 @@
 //
+// Created by bailey on 5/28/20.
+//
+
+#include "characterSets.h"
+//
 // Created by bailey on 5/20/20.
 //
 
@@ -24,6 +29,7 @@ void CharacterSet::buildCharacterSet(bool lo, bool up, bool num, bool symbol) no
         std::copy(symbols.begin(), symbols.end(), combinedSet.begin() + insertionIdx);
         insertionIdx += Constants::SYMBOL_COUNT;
     }
+    base = insertionIdx - 1;
 
     for (; insertionIdx != Constants::MAX_CHARS; ++insertionIdx) {
         combinedSet.at(insertionIdx) = '\0';

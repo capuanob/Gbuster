@@ -4,7 +4,8 @@
 
 #include "mainPanel.h"
 
-MainPanel::MainPanel(wxWindow *parent, HashModel&& model) : wxPanel(parent) {
+MainPanel::MainPanel(wxWindow *parent, HashModel& model) : wxPanel(parent) {
+    std::move(model);
     this->model = model;
     countLabel = new wxStaticText();
 
@@ -92,8 +93,8 @@ void MainPanel::SetUp() {
     crackButton->SetFont(btnFont);
     topSizer->AddSpacer(5);
     topSizer->Add(crackButton, 0, wxALIGN_RIGHT | wxRIGHT, 20);
-    SetSizerAndFit(topSizer);
 
+    SetSizerAndFit(topSizer);
     Layout();
 }
 
@@ -111,14 +112,21 @@ auto MainPanel::getCPUWorkloadOptions() -> std::vector<wxString> {
 
 BEGIN_EVENT_TABLE(MainPanel, wxPanel)
                 EVT_BUTTON(ID_CRACK, MainPanel::OnCrackBtnPressed)
+                EVT_TIMER(ID_TIMER, MainPanel::OnPollThreads)
+                EVT_COMMAND(THREAD_DELETE_ID, wxEVT_THREAD, MainPanel::OnThreadDeletion)
 END_EVENT_TABLE()
 
 void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
+    // Set up progress panel
+    UniqueCreate(&progressPanel, this);
+    progressPanel = new wxProgressPanel(this);
+    topSizer->Add(progressPanel, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 15);
+    Fit();
 
     // Set up character set using radio boxes
     CharacterSet::buildCharacterSet(lowercaseLetters->GetValue(), capitalLetters->GetValue(),
             numeric->GetValue(), symbols->GetValue());
-    NumberSystem::setBase(CharacterSet::getChars().size());
+    NumberSystem::setBase(CharacterSet::getBase());
 
     // Clean password maximum length (input)
     int maxLen = wxAtoi(passwordLengthCtrl->str());
@@ -129,9 +137,25 @@ void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
         return;
     }
 
-    // Create scheduler and dispatch threads
-    scheduler = std::make_unique<Scheduler>(threadCount, static_cast<unsigned int>(maxLen), std::move(model.getHashes())); // Deletes old value and assigns to new pointer
+    // Create scheduler
+    scheduler = std::make_unique<Scheduler>(threadCount, static_cast<unsigned int>(maxLen), std::move(model.getHashes()), this); // Deletes old value and assigns to new pointer
+
+    // Set up progress bar gauges
+    progressPanel->SetGauges(scheduler->getDistribution());
+
+    Fit();
+    Layout();
+
+    // Dispatch threads
+    start = high_resolution_clock::now();
     scheduler->dispatchWorkers();
+
+    // Update UI
+    progressTimer = new wxTimer(this, ID_TIMER);
+    progressTimer->Start(500);
+    const auto& threads = scheduler->getThreads();
+    const int len = threads.size();
+
 }
 
 auto MainPanel::getThreadCounts() -> std::vector<unsigned int> {
@@ -152,3 +176,39 @@ auto MainPanel::getThreadCounts() -> std::vector<unsigned int> {
 
     return values;
 }
+
+void MainPanel::OnPollThreads(wxTimerEvent &event) {
+    if (!scheduler->completed()) {
+        const auto &threads = scheduler->getThreads();
+        const unsigned int len = threads.size();
+        for (unsigned int i = 0; i < len; ++i) {
+            if (threads.at(i) != nullptr) {
+                progressPanel->UpdateGauge(i, threads.at(i)->getCount());
+            }
+        }
+    } else {
+        progressTimer->Stop();
+        end = high_resolution_clock::now();
+        duration<double, std::milli> ms = end - start;
+        std::cout << "This operation took " + std::to_string(ms.count() / 1000) +  " seconds\n";
+        for (const auto& pair : HashThread::getCracked()) {
+            std::cout << pair.first + "-->" + pair.second << "\n";
+        }
+        // Display results
+
+        // Save results to file
+
+        // Handle clean-up
+    }
+}
+
+void MainPanel::OnThreadDeletion(wxCommandEvent &event) {
+    int deletionIdx = event.GetInt();
+    progressPanel->FillProgressBar(deletionIdx); // Ensure UI had time to catch up, fill it to 100%
+    scheduler->deleteThread(deletionIdx);
+}
+
+MainPanel::~MainPanel() {
+
+}
+

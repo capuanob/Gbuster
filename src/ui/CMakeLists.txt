@@ -3,7 +3,9 @@ set(UI_SOURCES
         gFrame.cpp
         hashTestPanel.cpp
         mainPanel.cpp
-)
+        wxLabelledWindow.cpp
+        wxProgressPanel.cpp
+        )
 
 set(UI_HEADERS
         debugFrame.h
@@ -11,7 +13,10 @@ set(UI_HEADERS
         hashTestPanel.h
         IDs.h
         mainPanel.h
-        wxLabelledWindow.cpp wxLabelledWindow.h)
+        wxLabelledWindow.h
+        wxProgressPanel.h
+        wxHelper.h
+        )
 
 # Find wxWidgets
 find_package(wxWidgets COMPONENTS core base REQUIRED)

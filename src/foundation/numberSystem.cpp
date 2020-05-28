@@ -6,12 +6,15 @@
 auto NumberSystem::toBase(ull value, std::array<unsigned char, Constants::MAX_PASSWORD_LEN>& result) noexcept -> unsigned int {
     unsigned int i = 0;
     const auto& chars = CharacterSet::getChars();
-    const auto& front = chars[1];
-    do {
-        int remainder = static_cast<int>(value % base);
-        result.at(i++) = (remainder == 0) ? front : chars.at(remainder);
-        value /= base;
-    } while (value > 0);
 
+    while (value > base) {
+        --value;
+        int remainder = static_cast<int>(value % base);
+        value -= remainder;
+        result.at(i++) = chars.at(remainder + 1);
+        value /= base;
+    }
+
+    result.at(i++) = chars.at(value);
     return i;
 }
