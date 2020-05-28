@@ -187,6 +187,10 @@ void MainPanel::OnPollThreads(wxTimerEvent &event) {
             }
         }
     } else {
+        // Delete all remaining threads
+        scheduler->clean();
+
+        // Log results (for testing purposes)
         progressTimer->Stop();
         end = high_resolution_clock::now();
         duration<double, std::milli> ms = end - start;
@@ -194,6 +198,7 @@ void MainPanel::OnPollThreads(wxTimerEvent &event) {
         for (const auto& pair : HashThread::getCracked()) {
             std::cout << pair.first + "-->" + pair.second << "\n";
         }
+
         // Display results
 
         // Save results to file

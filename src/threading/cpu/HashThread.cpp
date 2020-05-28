@@ -22,6 +22,11 @@ auto HashThread::Entry() -> wxThread::ExitCode {
             resolvedHashes.emplace(digestStr, clearStr);
             mutex->Unlock(); // Exit CS
         }
+
+        // Ensure the scheduler hasn't asked the thread to terminate...
+        if (TestDestroy()) {
+            break;
+        }
         ++curr;
         ++count;
     }

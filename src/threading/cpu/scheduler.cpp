@@ -43,3 +43,11 @@ void Scheduler::deleteThread(int threadIdx) {
     thread_pool.at(threadIdx) = nullptr;
     ++deadThreads;
 }
+
+void Scheduler::clean() {
+    for (const auto& thread : thread_pool) {
+        if (thread != wxNullPtr) {
+            thread->Delete();
+        }
+    }
+}

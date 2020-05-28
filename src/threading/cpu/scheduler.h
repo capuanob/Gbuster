@@ -30,9 +30,17 @@ public:
 
     inline auto getThreads() const -> const std::vector<HashThread*>& { return thread_pool; }
 
+    /**
+     * Delete thread @ threadIDx
+     * @param threadIdx
+     */
     void deleteThread(int threadIdx);
 
-    inline auto completed() -> bool { return deadThreads >= thread_pool.size(); }
+    /**
+     * Delete all threads
+     */
+    void clean();
+    inline auto completed() -> bool { return deadThreads >= thread_pool.size() || HashThread::getCrackedCount() > 0 && HashThread::getCrackedCount() > hash_list.size(); }
 private:
     std::vector<HashThread*> thread_pool;
     unsigned int deadThreads; // Track how many threads have been deleted
