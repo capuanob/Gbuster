@@ -66,14 +66,13 @@ GFrame::GFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
 }
 
 void GFrame::loadMainUI(HashModel& model) {
-    UniqueCreate(&mainPanel, this, model);
+    UniqueCreate(mainPanel, this, model);
     topSizer->Add(mainPanel, 0, wxEXPAND);
 
     Layout();
 }
 
 void GFrame::OnTestMD5(wxCommandEvent &event) {
-    debugFrame.reset(new DebugFrame(this, "Admin Panel", wxDefaultPosition, wxSize(450, 600)));
-//    UniqueCreate(&debugFrame, this, "Admin Panel", wxDefaultPosition, wxSize(450, 600));
+    UniqueCreate(debugFrame, this, "Admin Panel", wxDefaultPosition, wxSize(450, 600));
     debugFrame->Show();
 }

@@ -13,7 +13,6 @@ class DebugFrame: public wxFrame {
 public:
     DebugFrame(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size);
 
-
 private:
     wxBoxSizer* topSizer; // Used for laying out the frame
      HashTestPanel* md5Panel; // Panel for testing md5

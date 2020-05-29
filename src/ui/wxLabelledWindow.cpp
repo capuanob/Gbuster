@@ -28,6 +28,7 @@ wxLabelledComboBox::wxLabelledComboBox(wxWindow *parent,
 {
     wxSize customSize{width, wxDefaultSize.y};
     box = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, customSize, contentCount, contents, wxCB_DROPDOWN);
+    box->SetSelection(0);
     addLabelledWindow(box);
 }
 

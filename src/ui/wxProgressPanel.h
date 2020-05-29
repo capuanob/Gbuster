@@ -23,6 +23,8 @@ public:
     // Constructor
     explicit wxProgressPanel(wxWindow* parent) : wxPanel(parent), topSizer(new wxBoxSizer(wxHORIZONTAL)) {}
 
+    // Destructor
+    ~wxProgressPanel();
     // Public methods
     void SetGauges(const std::vector<range>& ranges); // Builds and displays progress bars
 

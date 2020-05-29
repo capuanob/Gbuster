@@ -24,7 +24,6 @@ class MainPanel : public wxPanel {
 public:
     explicit MainPanel(wxWindow* parent, HashModel& model);
     ~MainPanel() override;
-
     // Event handling
     void OnCrackBtnPressed(wxCommandEvent& event); // Handles set-up and execution of a brute-force attack
     void OnPollThreads(wxTimerEvent& event); // Handles updating of progress bars to show thread progress
@@ -33,9 +32,14 @@ public:
     static auto getThreadCounts() -> std::vector<unsigned int>;
 private:
     void SetUp(); // Sets up the controls
+    void Reset(); // Prepare for next cracking
+    void toggleWorking(); // Toggles button label between crack and save and quit
     static auto getCPUWorkloadOptions() -> std::vector<wxString>;
+
     HashModel model;
     std::unique_ptr<Scheduler> scheduler;
+    bool isWorking{false}; // Track whether or not cracking is in progress
+
     wxFont labelFont{15, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
     wxFont btnFont{20, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL};
 
@@ -54,7 +58,7 @@ private:
 
     wxButton* crackButton = nullptr;
     wxTimer* progressTimer = nullptr;
-    wxProgressPanel* progressPanel = nullptr;
+    wxWeakRef<wxProgressPanel> progressPanel;
     wxBoxSizer* topSizer = new wxBoxSizer(wxVERTICAL);
 
     time_point<high_resolution_clock> start;

@@ -38,6 +38,10 @@ void wxProgressPanel::UpdateGauge(unsigned int gaugeIdx, unsigned long long int 
 }
 
 void wxProgressPanel::FillProgressBar(unsigned int gaugeIdx) {
-    assert(gaugeIdx < gauges.size());
+    assert(gaugeIdx < gauges.size() && gaugeIdx >= 0);
     gauges.at(gaugeIdx)->SetValue(MAX_RANGE);
+}
+
+wxProgressPanel::~wxProgressPanel() {
+    gauges.clear();
 }

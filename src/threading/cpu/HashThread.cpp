@@ -46,3 +46,8 @@ HashThread::~HashThread() {
     parent->GetEventHandler()->AddPendingEvent(deletionEvent);
     mutex->Unlock();
 }
+
+void HashThread::ResetHashThreads() {
+    hashList.clear();
+    resolvedHashes.clear();
+}

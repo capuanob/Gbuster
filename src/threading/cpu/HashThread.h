@@ -24,9 +24,10 @@ public:
     // Destructor
     ~HashThread() override;
     static void initSet(stringSet &&set);
+    static void ResetHashThreads(); // Deletes current hashList and resolvedHashes
     inline unsigned int getCount() const { return count; }
     inline static auto getCracked() -> const stringMap& { return resolvedHashes; }
-    inline static auto getCrackedCount() -> unsigned int { return resolvedHashes.size(); }
+    inline static auto complete() -> bool { return hashList.size() == resolvedHashes.size(); }
 private:
     inline static wxMutex* mutex = new wxMutex(); // Mutex used by all threads to control access to critical section of resolved hashes.
     wxPanel* parent;

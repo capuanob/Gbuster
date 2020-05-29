@@ -4,12 +4,11 @@
 
 #include "scheduler.h"
 
-#include <utility>
-
 Scheduler::Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes, wxPanel* parent)
         : hash_list(hashes), maxLen(maxLen), parent(parent), deadThreads{} {
-    // Build distribution
 
+    // Reset HashThreads for new Scheduler
+    HashThread::ResetHashThreads();
     // Establish cleartext range
     ull lastString = std::pow(NumberSystem::getBase(), maxLen);
     ull singleWorkLoad = static_cast<ull>(lastString / workerCount);
@@ -50,4 +49,8 @@ void Scheduler::clean() {
             thread->Delete();
         }
     }
+}
+
+Scheduler::~Scheduler() {
+    clean();
 }

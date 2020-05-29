@@ -117,9 +117,13 @@ BEGIN_EVENT_TABLE(MainPanel, wxPanel)
 END_EVENT_TABLE()
 
 void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
+    toggleWorking();
+    if (!isWorking) return;
+
     // Set up progress panel
-    UniqueCreate(&progressPanel, this);
-    progressPanel = new wxProgressPanel(this);
+    Reset();
+    UniqueCreate(progressPanel, this);
+
     topSizer->Add(progressPanel, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 15);
     Fit();
 
@@ -178,7 +182,7 @@ auto MainPanel::getThreadCounts() -> std::vector<unsigned int> {
 }
 
 void MainPanel::OnPollThreads(wxTimerEvent &event) {
-    if (!scheduler->completed()) {
+    if (isWorking && !scheduler->completed()) {
         const auto &threads = scheduler->getThreads();
         const unsigned int len = threads.size();
         for (unsigned int i = 0; i < len; ++i) {
@@ -187,18 +191,13 @@ void MainPanel::OnPollThreads(wxTimerEvent &event) {
             }
         }
     } else {
-        // Delete all remaining threads
-        scheduler->clean();
-
-        // Log results (for testing purposes)
-        progressTimer->Stop();
         end = high_resolution_clock::now();
         duration<double, std::milli> ms = end - start;
         std::cout << "This operation took " + std::to_string(ms.count() / 1000) +  " seconds\n";
         for (const auto& pair : HashThread::getCracked()) {
             std::cout << pair.first + "-->" + pair.second << "\n";
         }
-
+        toggleWorking();
         // Display results
 
         // Save results to file
@@ -209,11 +208,29 @@ void MainPanel::OnPollThreads(wxTimerEvent &event) {
 
 void MainPanel::OnThreadDeletion(wxCommandEvent &event) {
     int deletionIdx = event.GetInt();
-    progressPanel->FillProgressBar(deletionIdx); // Ensure UI had time to catch up, fill it to 100%
-    scheduler->deleteThread(deletionIdx);
+    if (progressPanel != nullptr) progressPanel->FillProgressBar(deletionIdx); // Ensure UI had time to catch up, fill it to 100%
+    if (scheduler != nullptr) scheduler->deleteThread(deletionIdx);
 }
 
 MainPanel::~MainPanel() {
-
+    Reset();
 }
 
+void MainPanel::Reset() {
+    // If timer exists, stop it.
+    if (progressTimer != nullptr && progressTimer->IsRunning()) progressTimer->Stop();
+    if (progressPanel) progressPanel->Destroy();
+    scheduler = nullptr;
+    progressTimer = nullptr;
+}
+
+void MainPanel::toggleWorking() {
+    isWorking = !isWorking;
+    if (isWorking) { // Starting...
+        crackButton->SetLabel("SAVE/QUIT");
+    } else { // Stopping...
+        crackButton->SetLabel("CRACK");
+        Reset();
+    }
+    Layout();
+}

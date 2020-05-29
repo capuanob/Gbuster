@@ -21,7 +21,6 @@ using hashFuncSig = void(std::array<unsigned char, Constants::MAX_PASSWORD_LEN>&
 class HashTestPanel: public wxPanel {
 public:
     HashTestPanel(wxWindow* parent, const wxString& lbl, hashFuncSig fnc);
-    ~HashTestPanel() override = default;
 
     void OnPress(wxCommandEvent& event);
     void OnTextDidChange(wxCommandEvent& event);

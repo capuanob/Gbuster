@@ -9,7 +9,6 @@
 #include <wx/textfile.h>
 #include "mainPanel.h"
 #include "debugFrame.h"
-#include <wx/windowptr.h>
 
 class GFrame: public wxFrame
 {
@@ -18,8 +17,8 @@ public:
     ~GFrame() override = default;
 private:
     wxBoxSizer* topSizer;
-    MainPanel* mainPanel = nullptr;
-    wxWindowPtr<DebugFrame> debugFrame{};
+    wxWeakRef<MainPanel> mainPanel;
+    wxWeakRef<DebugFrame> debugFrame;
     // Event handlers //
     void OnLoad(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);

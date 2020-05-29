@@ -21,6 +21,7 @@ public:
      * @param hashes Collection of hashes to break
      */
     Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes, wxPanel* parent);
+    ~Scheduler();
     /**
      * Thread driver functions. Creates and starts threads.
      */
@@ -40,7 +41,10 @@ public:
      * Delete all threads
      */
     void clean();
-    inline auto completed() -> bool { return deadThreads >= thread_pool.size() || HashThread::getCrackedCount() > 0 && HashThread::getCrackedCount() > hash_list.size(); }
+    inline auto completed() -> bool {
+        return deadThreads >= thread_pool.size() || HashThread::complete(); // All threads are done OR all hashes resolved
+    }
+
 private:
     std::vector<HashThread*> thread_pool;
     unsigned int deadThreads; // Track how many threads have been deleted
