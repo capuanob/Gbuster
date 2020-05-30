@@ -11,6 +11,7 @@ set(FOUNDATION_HEADERS
         characterSets.h
         numberSystem.h
         constants.h
+        session.h
 )
 
 add_library(foundation STATIC ${FOUNDATION_SOURCES} ${FOUNDATION_HEADERS})

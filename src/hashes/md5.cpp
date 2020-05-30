@@ -126,5 +126,5 @@ void md5::final(std::array<byte, 16> &digest, md5::Context &context) {
     encode(digest, context.state);
 
     // Zeroize sensitive information
-    std::memset(&context, 0, sizeof(context));
+    context.zeroize();
 }

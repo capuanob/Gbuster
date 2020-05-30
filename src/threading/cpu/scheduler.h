@@ -35,7 +35,7 @@ public:
      * Delete thread @ threadIDx
      * @param threadIdx
      */
-    void deleteThread(int threadIdx);
+    void deleteThread(unsigned long int threadIdx);
 
     /**
      * Delete all threads

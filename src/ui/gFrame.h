@@ -9,6 +9,9 @@
 #include <wx/textfile.h>
 #include "mainPanel.h"
 #include "debugFrame.h"
+#include "session.h"
+#include <wx/dirdlg.h>
+#include <fstream>
 
 class GFrame: public wxFrame
 {
@@ -17,15 +20,23 @@ public:
     ~GFrame() override = default;
 private:
     wxBoxSizer* topSizer;
+    wxStatusBar* statusBar;
     wxWeakRef<MainPanel> mainPanel;
     wxWeakRef<DebugFrame> debugFrame;
+
+    // Private Properties
+    std::string defaultDirectory{};
+    std::string loadedFileName{};
+
     // Event handlers //
     void OnLoad(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnTestMD5(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
 
     void loadMainUI(HashModel& model);
+    void removeExtensionAndSave(std::string fullFileName);
 
     wxDECLARE_EVENT_TABLE();
 };

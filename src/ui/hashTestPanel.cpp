@@ -4,7 +4,7 @@
 
 #include "hashTestPanel.h"
 
-void HashTestPanel::OnPress(wxCommandEvent& event) {
+void HashTestPanel::OnPress(wxCommandEvent& WXUNUSED(event)) {
     auto cleartext = getTextBoxValue();
     std::array<unsigned char, 16> digest{};
     int length = textBox->GetLineLength(0);

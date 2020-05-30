@@ -5,7 +5,7 @@
 #include "scheduler.h"
 
 Scheduler::Scheduler(int workerCount, int maxLen, std::unordered_set<std::string>&& hashes, wxPanel* parent)
-        : hash_list(hashes), maxLen(maxLen), parent(parent), deadThreads{} {
+        : deadThreads{}, hash_list(hashes), parent(parent), maxLen(maxLen) {
 
     // Reset HashThreads for new Scheduler
     HashThread::ResetHashThreads();
@@ -37,8 +37,8 @@ void Scheduler::dispatchWorkers() {
     }
 }
 
-void Scheduler::deleteThread(int threadIdx) {
-    assert(threadIdx >= 0 && threadIdx <= thread_pool.size());
+void Scheduler::deleteThread(unsigned long int threadIdx) {
+    assert(threadIdx <= thread_pool.size());
     thread_pool.at(threadIdx) = nullptr;
     ++deadThreads;
 }

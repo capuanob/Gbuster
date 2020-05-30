@@ -11,13 +11,16 @@
  * This file provides functions to remove commonly used design patterns and prevent bugs
  */
 
-template <typename wxType, typename... TypeArgs>
-void UniqueCreate(wxWeakRef<wxType>& wxPtr, TypeArgs... args) {
-    static_assert(std::is_base_of_v<wxWindow, wxType>); // Ensure we are being passed a wxWindow descendant
+// Ensure a generic class is derived from wxWindow
+template <class T>
+concept wxDerivable = std::is_base_of<wxWindow, T>::value;
+
+template <typename T, typename... TypeArgs> requires wxDerivable<T>
+void UniqueCreate(wxWeakRef<T>& wxPtr, TypeArgs... args) {
     if (wxPtr != nullptr) {
         wxPtr->Destroy();
     }
-    wxPtr = new wxType((args)...);
+    wxPtr = new T((args)...);
 }
 
 

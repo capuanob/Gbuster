@@ -23,7 +23,7 @@ public:
     inline constexpr static void setBase(int b) noexcept { base = b; }
     inline static auto getBase() noexcept -> int { return base; }
 private:
-    inline static int base{};
+    inline static ull base{};
 
 };
 

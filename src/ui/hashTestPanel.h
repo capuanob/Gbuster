@@ -33,7 +33,7 @@ private:
     wxButton* hashButton;
     std::function<hashFuncSig> hashFunc;
 
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 

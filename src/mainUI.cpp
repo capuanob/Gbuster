@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err58-cpp"
 //
 // Created by bailey on 5/8/20.
 //
@@ -30,7 +28,7 @@ wxPoint UI::getCenterOfDisplay() {
     std::vector<displayInfo> displays;
     displays.reserve(monitorCount);
 
-    for (int i = 0; i < monitorCount; ++i)
+    for (unsigned int i = 0; i < monitorCount; ++i)
             displays.emplace_back(i, wxDisplay(i).GetClientArea().x);
     std::sort(displays.begin(), displays.end(), [](const displayInfo& a, const displayInfo& b) {
         return a.second < b.second;
@@ -47,6 +45,7 @@ wxPoint UI::getCenterOfDisplay() {
 // Instantiates the event table
 wxBEGIN_EVENT_TABLE(GFrame, wxFrame)
                 EVT_MENU(ID_LOAD, GFrame::OnLoad)
+                EVT_MENU(ID_SAVE, GFrame::OnSave)
                 EVT_MENU(ID_TEST_MD5, GFrame::OnTestMD5)
                 EVT_MENU(wxID_EXIT, GFrame::OnExit)
                 EVT_MENU(wxID_ABOUT, GFrame::OnAbout)
@@ -54,5 +53,3 @@ wxEND_EVENT_TABLE()
 
 // Instantiate the application (main)
 wxIMPLEMENT_APP(UI);
-
-#pragma clang diagnostic pop

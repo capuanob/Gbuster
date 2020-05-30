@@ -26,6 +26,7 @@ public:
     wxLabelledComboBox(wxWindow* parent, int width, const wxString* contents, int contentCount,
                        const wxString& lbl = wxEmptyString);
     [[nodiscard]] auto getIndex() const -> unsigned int { return box->GetSelection(); }
+    [[nodiscard]] auto getSelection() const -> std::string { return box->GetValue().ToStdString(); }
 private:
     wxComboBox* box = nullptr;
 };

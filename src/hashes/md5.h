@@ -103,6 +103,12 @@ namespace md5 {
         std::array<byte, DOUBLE_WORD> buffer{}; // Input buffer
 
         Context();
+
+        void zeroize() {
+            std::memset(&state, 0, sizeof(state));
+            std::memset(&count, 0, sizeof(count));
+            std::memset(&buffer, 0, sizeof(buffer));
+        }
     };
 
 

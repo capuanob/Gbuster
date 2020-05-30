@@ -4,21 +4,37 @@
 
 #include "mainPanel.h"
 
-MainPanel::MainPanel(wxWindow *parent, HashModel& model) : wxPanel(parent) {
+MainPanel::MainPanel(wxWindow *parent, HashModel& model, Session& s) : wxPanel(parent), SESSION(s) {
     std::move(model);
     this->model = model;
-    countLabel = new wxStaticText();
 
+    temperatureTimer.SetOwner(this, ID_TEMP_TIMER);
+    temperatureTimer.Start(2000);
     SetUp();
 }
 
 void MainPanel::SetUp() {
+    /// Set up temperature label
+    auto* labelSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto* leadingLabel = new wxStaticText(this, wxID_ANY, "Thermal Zones (C): ");
+    labelSizer->Add(leadingLabel);
+
+    int labelCount = SESSION.temperatureFilePaths.size();
+    tempLabels.reserve(labelCount); // Create as many labels as there are thermal zones
+    for (int i = 0; i < labelCount; ++i) {
+        tempLabels.push_back(new wxStaticText(this, wxID_ANY, "", wxDefaultPosition, wxSize(20, -1)));
+        labelSizer->Add(tempLabels.back(), 0, wxALIGN_RIGHT);
+    }
+    topSizer->AddSpacer(10);
+    topSizer->Add(labelSizer, 0, wxALIGN_LEFT);
 
     /// Setup label
     wxString lbl{std::to_string(model.size()) + " hashes successfully loaded"};
-    countLabel = new wxStaticText(this, wxID_ANY, lbl);
+    countLabel = new wxStaticText(this, wxID_ANY, lbl, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
     countLabel->SetFont(labelFont);
+
     topSizer->Add(countLabel, 0, wxALIGN_CENTER_HORIZONTAL);
+
 
     auto* horizSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -41,13 +57,11 @@ void MainPanel::SetUp() {
 
     auto* workloadSizer = new wxBoxSizer(wxHORIZONTAL);
     auto workloadVec = MainPanel::getCPUWorkloadOptions();
-    wxString workloadOptions[workloadVec.size()];
-    std::copy(workloadVec.begin(), workloadVec.end(), workloadOptions);
 
     wxString temperatures[] = { "90", "85", "80", "75", "70" };
     int temperaturesSize = sizeof(temperatures) / sizeof(temperatures[0]);
 
-    workloadBox = new wxLabelledComboBox(this, 150, workloadOptions,
+    workloadBox = new wxLabelledComboBox(this, 150, &workloadVec.front(),
             workloadVec.size(), "Workload profile: ");
     temperatureBox = new wxLabelledComboBox(this, 75, temperatures,
             temperaturesSize, "Abort (C): ");
@@ -66,6 +80,7 @@ void MainPanel::SetUp() {
 
     capitalLetters = new wxCheckBox(charSetContainer, wxID_ANY, "A-Z");
     lowercaseLetters = new wxCheckBox(charSetContainer, wxID_ANY, "a-z");
+    lowercaseLetters->SetValue(true); // Default selection
     numeric = new wxCheckBox(charSetContainer, wxID_ANY, "0-9");
     symbols = new wxCheckBox(charSetContainer, wxID_ANY, R"("!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~")");
 
@@ -103,7 +118,7 @@ auto MainPanel::getCPUWorkloadOptions() -> std::vector<wxString> {
     std::vector<wxString> options;
 
     std::vector<wxString> text = { "Unresponsive", "Heavy", "Moderate", "Light" };
-    for (int i = 0; i < values.size(); ++i) {
+    for (unsigned long int i = 0; i < values.size(); ++i) {
         options.emplace_back(text[i] + " (" + std::to_string(values[i]) + ")");
     }
 
@@ -112,19 +127,19 @@ auto MainPanel::getCPUWorkloadOptions() -> std::vector<wxString> {
 
 BEGIN_EVENT_TABLE(MainPanel, wxPanel)
                 EVT_BUTTON(ID_CRACK, MainPanel::OnCrackBtnPressed)
-                EVT_TIMER(ID_TIMER, MainPanel::OnPollThreads)
+                EVT_TIMER(ID_PROG_TIMER, MainPanel::OnPollThreads)
+                EVT_TIMER(ID_TEMP_TIMER, MainPanel::OnPollCoreTemps)
                 EVT_COMMAND(THREAD_DELETE_ID, wxEVT_THREAD, MainPanel::OnThreadDeletion)
 END_EVENT_TABLE()
 
-void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
-    toggleWorking();
-    if (!isWorking) return;
-
-    // Set up progress panel
+void MainPanel::OnCrackBtnPressed(wxCommandEvent& WXUNUSED(event)) {
     Reset();
+    toggleWorking();
+
     UniqueCreate(progressPanel, this);
 
     topSizer->Add(progressPanel, 0, wxEXPAND | wxALIGN_CENTER_HORIZONTAL | wxALL, 15);
+    topSizer->AddStretchSpacer();
     Fit();
 
     // Set up character set using radio boxes
@@ -141,6 +156,16 @@ void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
         return;
     }
 
+    // Set up session
+    SESSION.maxCoreTemp = static_cast<double>(std::stoi(temperatureBox->getSelection()));
+    SESSION.characterSets = {
+            lowercaseLetters->GetValue(), capitalLetters->GetValue(),
+            numeric->GetValue(), symbols->GetValue()
+    };
+    SESSION.chosenPasswordLen = maxLen;
+    SESSION.threadCount = threadCount;
+    SESSION.hashUsed = static_cast<HashType>(hashBox->getIndex());
+
     // Create scheduler
     scheduler = std::make_unique<Scheduler>(threadCount, static_cast<unsigned int>(maxLen), std::move(model.getHashes()), this); // Deletes old value and assigns to new pointer
 
@@ -151,15 +176,11 @@ void MainPanel::OnCrackBtnPressed(wxCommandEvent& event) {
     Layout();
 
     // Dispatch threads
-    start = high_resolution_clock::now();
+    SESSION.start = high_resolution_clock::now();
     scheduler->dispatchWorkers();
 
-    // Update UI
-    progressTimer = new wxTimer(this, ID_TIMER);
-    progressTimer->Start(500);
-    const auto& threads = scheduler->getThreads();
-    const int len = threads.size();
 
+    temperatureTimer.SetOwner(this, ID_TEMP_TIMER);
 }
 
 auto MainPanel::getThreadCounts() -> std::vector<unsigned int> {
@@ -181,8 +202,8 @@ auto MainPanel::getThreadCounts() -> std::vector<unsigned int> {
     return values;
 }
 
-void MainPanel::OnPollThreads(wxTimerEvent &event) {
-    if (isWorking && !scheduler->completed()) {
+void MainPanel::OnPollThreads(wxTimerEvent & WXUNUSED(event)) {
+    if (shouldContinueExecution()) {
         const auto &threads = scheduler->getThreads();
         const unsigned int len = threads.size();
         for (unsigned int i = 0; i < len; ++i) {
@@ -191,18 +212,15 @@ void MainPanel::OnPollThreads(wxTimerEvent &event) {
             }
         }
     } else {
-        end = high_resolution_clock::now();
-        duration<double, std::milli> ms = end - start;
+        SESSION.end = high_resolution_clock::now();
+        duration<double, std::milli> ms = SESSION.end - SESSION.start;
         std::cout << "This operation took " + std::to_string(ms.count() / 1000) +  " seconds\n";
         for (const auto& pair : HashThread::getCracked()) {
             std::cout << pair.first + "-->" + pair.second << "\n";
         }
         toggleWorking();
-        // Display results
-
-        // Save results to file
-
-        // Handle clean-up
+        InvalidateBestSize();
+        Layout();
     }
 }
 
@@ -218,19 +236,62 @@ MainPanel::~MainPanel() {
 
 void MainPanel::Reset() {
     // If timer exists, stop it.
-    if (progressTimer != nullptr && progressTimer->IsRunning()) progressTimer->Stop();
+    if (progressTimer.IsRunning()) progressTimer.Stop();
     if (progressPanel) progressPanel->Destroy();
     scheduler = nullptr;
-    progressTimer = nullptr;
 }
 
 void MainPanel::toggleWorking() {
-    isWorking = !isWorking;
-    if (isWorking) { // Starting...
+    if (!progressTimer.IsRunning()) { // Starting...
+        progressTimer.SetOwner(this, ID_PROG_TIMER);
+        progressTimer.Start(500);
         crackButton->SetLabel("SAVE/QUIT");
     } else { // Stopping...
         crackButton->SetLabel("CRACK");
         Reset();
     }
     Layout();
+}
+
+void MainPanel::OnPollCoreTemps(wxTimerEvent & WXUNUSED(event)) {
+    const auto& coreTemperatures = CpuHardware::getCoreTemperatures(SESSION.temperatureFilePaths);
+
+    UpdateCoreTempUI(coreTemperatures);
+
+    if (SESSION.maxCoreTemp == DEFAULT_TEMP) return;
+
+    if (coreTemperatures.empty()) {
+        wxMessageBox("Unable to locate CPU core temperatures for excess-heat termination", "Error", wxICON_ERROR);
+        temperatureTimer.Stop(); // Won't be needing this
+        return;
+    }
+
+    for (const auto& temp : coreTemperatures) {
+        if (temp >= SESSION.maxCoreTemp) {
+            temperatureTimer.Stop();
+            wxMessageBox("You can still write out any resolved hashes.",
+                    "WARNING: Core temperatures reached " + std::to_string(temp), wxICON_WARNING);
+            return;
+        }
+    }
+}
+
+void MainPanel::UpdateCoreTempUI(const std::vector<double>& newTemperatures) {
+    std::ostringstream ss;
+
+    int len = newTemperatures.size();
+    for (int i = 0; i < len; ++i) {
+        wxColor c;
+        const auto& temp = newTemperatures.at(i);
+        if (SESSION.maxCoreTemp < temp || SESSION.maxCoreTemp - temp < 5) c = tempRed;
+        else if (SESSION.maxCoreTemp - temp < 10) c = tempOrange;
+        else c = tempGreen;
+
+        ss << std::setprecision(2) << temp;
+        tempLabels.at(i)->SetLabel(ss.str());
+        tempLabels.at(i)->SetForegroundColour(c);
+        ss.str("");
+    }
+
+
 }

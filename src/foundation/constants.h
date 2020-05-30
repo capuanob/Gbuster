@@ -5,6 +5,10 @@
 #ifndef GBUSTER_CONSTANTS_H
 #define GBUSTER_CONSTANTS_H
 
+enum class HashType {
+    MD5 = 0,
+    SHA1
+};
 
 class Constants {
 public:
